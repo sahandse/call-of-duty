@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-vazirmatn: 'Vazirmatn', Tahoma, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #080808;
+  color: #ffffff;
+  font-family: var(--font-vazirmatn);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #c8a415; }
+
+/* Rarity borders + glows */
+.rarity-common    { border-color: #9ca3af; }
+.rarity-rare      { border-color: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.2); }
+.rarity-epic      { border-color: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.2); }
+.rarity-legendary { border-color: #f97316; box-shadow: 0 0 12px rgba(249,115,22,0.25); }
+.rarity-ultra     { border-color: #c8a415; box-shadow: 0 0 16px rgba(200,164,21,0.4); }
+
+/* Category badge colors */
+.badge-daily       { background: rgba(59,130,246,0.15);  color: #60a5fa;  border-color: rgba(59,130,246,0.3); }
+.badge-weekly      { background: rgba(168,85,247,0.15); color: #c084fc;  border-color: rgba(168,85,247,0.3); }
+.badge-seasonal    { background: rgba(249,115,22,0.15); color: #fb923c;  border-color: rgba(249,115,22,0.3); }
+.badge-weapon      { background: rgba(234,179,8,0.15);  color: #facc15;  border-color: rgba(234,179,8,0.3); }
+.badge-operator    { background: rgba(239,68,68,0.15);  color: #f87171;  border-color: rgba(239,68,68,0.3); }
+.badge-battle_pass { background: rgba(6,182,212,0.15);  color: #22d3ee;  border-color: rgba(6,182,212,0.3); }
+.badge-ranked      { background: rgba(244,63,94,0.15);  color: #fb7185;  border-color: rgba(244,63,94,0.3); }
+
+.diff-آسان   { color: #4ade80; }
+.diff-متوسط { color: #facc15; }
+.diff-سخت   { color: #f87171; }
+
+/* Shine animation for ultra items */
+@keyframes shine {
+  0%   { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(300%) rotate(45deg); }
+}
+.ultra-shine::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  animation: shine 3s infinite;
+}
+
+/* Live pulse */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.live-dot { animation: livePulse 1.5s ease-in-out infinite; }
