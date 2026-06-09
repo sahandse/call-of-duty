@@ -3,13 +3,81 @@ import { useState } from 'react'
 import Header from './components/Header'
 import ObjectivesSection from './components/ObjectivesSection'
 import ShopSection from './components/ShopSection'
+import LoadoutBuilder from './components/LoadoutBuilder'
+import MetaReport from './components/MetaReport'
+import CamoTracker from './components/CamoTracker'
+import BattlePassSection from './components/BattlePassSection'
+import PatchNotesSection from './components/PatchNotesSection'
+import MapsSection from './components/MapsSection'
+import ShopHistory from './components/ShopHistory'
+
+type Tab =
+  | 'objectives'
+  | 'shop'
+  | 'loadout'
+  | 'meta'
+  | 'camo'
+  | 'battlepass'
+  | 'patchnotes'
+  | 'maps'
+  | 'shophistory'
+
+const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: string }> = {
+  objectives: {
+    title: '🎯 اهداف و چالش‌های Call of Duty',
+    description: 'تمام مأموریت‌های روزانه، هفتگی، فصلی، سلاح، اپراتور، پاس نبرد و رتبه‌بندی — با جستجو و دسته‌بندی کامل',
+    icon: '⚔️',
+  },
+  shop: {
+    title: '🛒 آیتم شاپ روزانه',
+    description: 'آیتم‌های امروز شاپ با تایمر بروزرسانی خودکار — فیلتر بر اساس دسته‌بندی و کمیابی',
+    icon: '💎',
+  },
+  loadout: {
+    title: '🔧 لودآوت‌ساز',
+    description: 'لودآوت‌های دلخواه خود را بساز، ذخیره کن و با دوستانت به اشتراک بگذار',
+    icon: '🔫',
+  },
+  meta: {
+    title: '📊 تیر لیست متا',
+    description: 'بهترین سلاح‌های فعلی Warzone و MW3 با آمار کامل، رتبه‌بندی و بهترین اتچمنت‌ها',
+    icon: '📈',
+  },
+  camo: {
+    title: '🎨 تراکر کامو',
+    description: 'پیشرفت چالش‌های کامو سلاح‌ها را ردیابی کن — از پایه تا Polyatomic',
+    icon: '🏆',
+  },
+  battlepass: {
+    title: '🎫 Battle Pass',
+    description: 'تمام ۱۰۰ تیر پاس نبرد سیزن جاری را مشاهده کن و پیشرفتت را ثبت کن',
+    icon: '⭐',
+  },
+  patchnotes: {
+    title: '📋 پَچ نوتس',
+    description: 'آخرین بروزرسانی‌ها، بالانس سلاح‌ها، محتوای جدید و رفع باگ‌ها',
+    icon: '🔔',
+  },
+  maps: {
+    title: '🗺️ نقشه‌ها',
+    description: 'اطلاعات، نکات استراتژیک و راهنمای تمام نقشه‌های Warzone و MW3',
+    icon: '🌍',
+  },
+  shophistory: {
+    title: '🕐 تاریخچه شاپ',
+    description: 'آیتم‌های شاپ ۵ روز گذشته — اگر آیتمی را از دست دادی اینجا ببین',
+    icon: '📅',
+  },
+}
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('objectives')
+  const [activeTab, setActiveTab] = useState<Tab>('objectives')
+
+  const hero = HERO_CONTENT[activeTab]
 
   return (
     <div className="min-h-screen bg-cod-bg">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <Header activeTab={activeTab} onTabChange={(t) => setActiveTab(t as Tab)} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Hero banner */}
@@ -18,28 +86,32 @@ export default function Home() {
           <div className="relative px-6 py-5 flex items-center gap-4">
             <div className="flex flex-col gap-1">
               <h2 className="text-white text-xl font-extrabold tracking-wide">
-                {activeTab === 'objectives'
-                  ? '🎯 اهداف و چالش‌های Call of Duty'
-                  : '🛒 آیتم شاپ روزانه'}
+                {hero.title}
               </h2>
               <p className="text-gray-400 text-sm">
-                {activeTab === 'objectives'
-                  ? 'تمام مأموریت‌های روزانه، هفتگی، فصلی، سلاح، اپراتور، پاس نبرد و رتبه‌بندی — با جستجو و دسته‌بندی کامل'
-                  : 'آیتم‌های امروز شاپ با تایمر بروزرسانی خودکار — فیلتر بر اساس دسته‌بندی و کمیابی'}
+                {hero.description}
               </p>
             </div>
             <div className="mr-auto text-5xl opacity-30 select-none hidden md:block">
-              {activeTab === 'objectives' ? '⚔️' : '💎'}
+              {hero.icon}
             </div>
           </div>
         </div>
 
         {/* Tab content */}
         <div className="animate-fade-in">
-          {activeTab === 'objectives' ? <ObjectivesSection /> : <ShopSection />}
+          {activeTab === 'objectives'  && <ObjectivesSection />}
+          {activeTab === 'shop'        && <ShopSection />}
+          {activeTab === 'loadout'     && <LoadoutBuilder />}
+          {activeTab === 'meta'        && <MetaReport />}
+          {activeTab === 'camo'        && <CamoTracker />}
+          {activeTab === 'battlepass'  && <BattlePassSection />}
+          {activeTab === 'patchnotes'  && <PatchNotesSection />}
+          {activeTab === 'maps'        && <MapsSection />}
+          {activeTab === 'shophistory' && <ShopHistory />}
         </div>
 
-        {/* Footer with site suggestions */}
+        {/* Footer */}
         <footer className="mt-16 border-t border-cod-border pt-8 pb-6">
           <h3 className="text-gray-300 font-bold mb-4 text-sm">🔗 منابع پیشنهادی</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

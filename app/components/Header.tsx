@@ -13,8 +13,15 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
   useEffect(() => setMounted(true), [])
 
   const tabs = [
-    { id: 'objectives', label: 'اهداف و چالش‌ها', icon: '🎯' },
-    { id: 'shop',       label: 'آیتم شاپ',         icon: '🛒' },
+    { id: 'objectives',  label: 'اهداف',          icon: '🎯' },
+    { id: 'shop',        label: 'آیتم شاپ',        icon: '🛒' },
+    { id: 'loadout',     label: 'لودآوت‌ساز',      icon: '🔧' },
+    { id: 'meta',        label: 'متا',              icon: '📊' },
+    { id: 'camo',        label: 'کامو',             icon: '🎨' },
+    { id: 'battlepass',  label: 'Battle Pass',      icon: '🎫' },
+    { id: 'patchnotes',  label: 'پَچ نوتس',        icon: '📋' },
+    { id: 'maps',        label: 'نقشه‌ها',          icon: '🗺️' },
+    { id: 'shophistory', label: 'تاریخچه شاپ',     icon: '🕐' },
   ]
 
   return (
@@ -28,7 +35,7 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
             </div>
             <div>
               <h1 className="text-white font-bold text-lg leading-none">Call of Duty</h1>
-              <p className="text-gray-500 text-xs">راهنمای اهداف و آیتم شاپ</p>
+              <p className="text-gray-500 text-xs">راهنمای جامع فارسی</p>
             </div>
           </div>
 
@@ -52,22 +59,24 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 pb-0">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 ${
-                activeTab === tab.id
-                  ? 'text-cod-gold border-cod-gold'
-                  : 'text-gray-400 border-transparent hover:text-white'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
+        {/* Tabs — scrollable */}
+        <div className="overflow-x-auto scrollbar-none">
+          <div className="flex gap-1 pb-0 min-w-max">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'text-cod-gold border-cod-gold'
+                    : 'text-gray-400 border-transparent hover:text-white'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </header>
