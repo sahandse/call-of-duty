@@ -10,12 +10,18 @@ import BattlePassSection from './components/BattlePassSection'
 import PatchNotesSection from './components/PatchNotesSection'
 import MapsSection from './components/MapsSection'
 import ShopHistory from './components/ShopHistory'
+import WeaponCompare from './components/WeaponCompare'
+import SettingsGuide from './components/SettingsGuide'
+import PerksGuide from './components/PerksGuide'
 
 type Tab =
   | 'objectives'
   | 'shop'
   | 'loadout'
   | 'meta'
+  | 'compare'
+  | 'perks'
+  | 'settings'
   | 'camo'
   | 'battlepass'
   | 'patchnotes'
@@ -68,6 +74,21 @@ const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: stri
     description: 'آیتم‌های شاپ ۵ روز گذشته — اگر آیتمی را از دست دادی اینجا ببین',
     icon: '📅',
   },
+  compare: {
+    title: '⚖️ مقایسه سلاح‌ها',
+    description: 'دو سلاح را انتخاب کن و آمار آن‌ها را کنار هم مقایسه کن — آسیب، رنج، نرخ آتش و بیشتر',
+    icon: '🔫',
+  },
+  perks: {
+    title: '🎖️ Perks و متا لودآوت‌ها',
+    description: 'بهترین Perk‌ها برای هر سبک بازی و لودآوت‌های آماده متا با اتچمنت‌های کامل',
+    icon: '⚔️',
+  },
+  settings: {
+    title: '⚙️ تنظیمات پیشنهادی',
+    description: 'بهترین تنظیمات گرافیک، صدا، کنترلر و کیبورد بر اساس توصیه بازیکنان حرفه‌ای',
+    icon: '🎮',
+  },
 }
 
 export default function Home() {
@@ -104,6 +125,9 @@ export default function Home() {
           {activeTab === 'shop'        && <ShopSection />}
           {activeTab === 'loadout'     && <LoadoutBuilder />}
           {activeTab === 'meta'        && <MetaReport />}
+          {activeTab === 'compare'     && <WeaponCompare />}
+          {activeTab === 'perks'       && <PerksGuide />}
+          {activeTab === 'settings'    && <SettingsGuide />}
           {activeTab === 'camo'        && <CamoTracker />}
           {activeTab === 'battlepass'  && <BattlePassSection />}
           {activeTab === 'patchnotes'  && <PatchNotesSection />}
@@ -111,50 +135,8 @@ export default function Home() {
           {activeTab === 'shophistory' && <ShopHistory />}
         </div>
 
-        {/* Footer */}
-        <footer className="mt-16 border-t border-cod-border pt-8 pb-6">
-          <h3 className="text-gray-300 font-bold mb-4 text-sm">🔗 منابع پیشنهادی</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                name: 'wzstats.gg',
-                icon: '📊',
-                description: 'آمار سلاح‌ها، متای فعلی، بهترین لودآوت‌ها، آمار بازیکنان',
-                features: ['آمار real-time سلاح', 'متا و تیر لیست', 'آمار بازیکن', 'مقایسه سلاح'],
-                color: 'border-blue-500/30',
-              },
-              {
-                name: 'tracker.gg/warzone',
-                icon: '🏆',
-                description: 'ردیابی پروفایل، لیدربورد، تاریخچه مسابقات، آمار دقیق',
-                features: ['پروفایل بازیکن', 'لیدربورد جهانی', 'تاریخچه مسابقات', 'آمار K/D'],
-                color: 'border-purple-500/30',
-              },
-              {
-                name: 'warzoneloadout.games',
-                icon: '🔫',
-                description: 'بهترین لودآوت‌های متا، تیر لیست سلاح، راهنمای تنظیمات',
-                features: ['لودآوت‌های متا', 'تیر لیست سلاح', 'تنظیمات پیشنهادی', 'راهنمای perks'],
-                color: 'border-green-500/30',
-              },
-            ].map(site => (
-              <div key={site.name} className={`bg-cod-card border ${site.color} rounded-xl p-4`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{site.icon}</span>
-                  <span className="text-white font-bold text-sm">{site.name}</span>
-                </div>
-                <p className="text-gray-400 text-xs mb-3">{site.description}</p>
-                <div className="flex flex-wrap gap-1">
-                  {site.features.map(f => (
-                    <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700">
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-gray-600 text-xs mt-6">
+        <footer className="mt-16 border-t border-cod-border pt-6 pb-4">
+          <p className="text-center text-gray-600 text-xs">
             CoD Objectives FA — اطلاعات بر اساس فصل جاری بروزرسانی می‌شوند
           </p>
         </footer>
