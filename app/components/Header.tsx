@@ -13,18 +13,24 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
   useEffect(() => setMounted(true), [])
 
   const tabs = [
-    { id: 'objectives',  label: 'اهداف',          icon: '🎯' },
-    { id: 'shop',        label: 'آیتم شاپ',        icon: '🛒' },
-    { id: 'loadout',     label: 'لودآوت‌ساز',      icon: '🔧' },
-    { id: 'meta',        label: 'متا',              icon: '📊' },
-    { id: 'compare',     label: 'مقایسه سلاح',     icon: '⚖️' },
-    { id: 'perks',       label: 'Perks & لودآوت',  icon: '🎖️' },
-    { id: 'settings',    label: 'تنظیمات',         icon: '⚙️' },
-    { id: 'camo',        label: 'کامو',             icon: '🎨' },
-    { id: 'battlepass',  label: 'Battle Pass',      icon: '🎫' },
-    { id: 'patchnotes',  label: 'پَچ نوتس',        icon: '📋' },
-    { id: 'maps',        label: 'نقشه‌ها',          icon: '🗺️' },
-    { id: 'shophistory', label: 'تاریخچه شاپ',     icon: '🕐' },
+    { id: 'dashboard',   label: 'داشبورد',          icon: '📈' },
+    { id: 'objectives',  label: 'اهداف',            icon: '🎯' },
+    { id: 'shop',        label: 'آیتم شاپ',          icon: '🛒' },
+    { id: 'loadout',     label: 'لودآوت‌ساز',        icon: '🔧' },
+    { id: 'meta',        label: 'متا',               icon: '📊' },
+    { id: 'compare',     label: 'مقایسه سلاح',       icon: '⚖️' },
+    { id: 'ttk',         label: 'TTK',               icon: '⏱️' },
+    { id: 'perks',       label: 'Perks & لودآوت',    icon: '🎖️' },
+    { id: 'settings',    label: 'تنظیمات',           icon: '⚙️' },
+    { id: 'teambuilder', label: 'تیم‌ساز',           icon: '👥' },
+    { id: 'dropguide',   label: 'Drop Guide',        icon: '🪂' },
+    { id: 'events',      label: 'رویدادها',           icon: '🎉' },
+    { id: 'collection',  label: 'کالکشن',            icon: '🏆' },
+    { id: 'camo',        label: 'کامو',              icon: '🎨' },
+    { id: 'battlepass',  label: 'Battle Pass',       icon: '🎫' },
+    { id: 'patchnotes',  label: 'پَچ نوتس',          icon: '📋' },
+    { id: 'maps',        label: 'نقشه‌ها',            icon: '🗺️' },
+    { id: 'shophistory', label: 'تاریخچه شاپ',       icon: '🕐' },
   ]
 
   return (

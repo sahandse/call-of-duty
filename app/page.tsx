@@ -13,15 +13,27 @@ import ShopHistory from './components/ShopHistory'
 import WeaponCompare from './components/WeaponCompare'
 import SettingsGuide from './components/SettingsGuide'
 import PerksGuide from './components/PerksGuide'
+import TTKCalculator from './components/TTKCalculator'
+import DropGuide from './components/DropGuide'
+import ActiveEvents from './components/ActiveEvents'
+import CollectionTracker from './components/CollectionTracker'
+import TeamBuilder from './components/TeamBuilder'
+import ProgressDashboard from './components/ProgressDashboard'
 
 type Tab =
+  | 'dashboard'
   | 'objectives'
   | 'shop'
   | 'loadout'
   | 'meta'
   | 'compare'
+  | 'ttk'
   | 'perks'
   | 'settings'
+  | 'teambuilder'
+  | 'dropguide'
+  | 'events'
+  | 'collection'
   | 'camo'
   | 'battlepass'
   | 'patchnotes'
@@ -29,6 +41,11 @@ type Tab =
   | 'shophistory'
 
 const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: string }> = {
+  dashboard: {
+    title: '📈 داشبورد پیشرفت',
+    description: 'خلاصه کامو، Battle Pass، کالکشن و رویدادها در یک نگاه',
+    icon: '🎮',
+  },
   objectives: {
     title: '🎯 اهداف و چالش‌های Call of Duty',
     description: 'تمام مأموریت‌های روزانه، هفتگی، فصلی، سلاح، اپراتور، پاس نبرد و رتبه‌بندی — با جستجو و دسته‌بندی کامل',
@@ -79,6 +96,11 @@ const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: stri
     description: 'دو سلاح را انتخاب کن و آمار آن‌ها را کنار هم مقایسه کن — آسیب، رنج، نرخ آتش و بیشتر',
     icon: '🔫',
   },
+  ttk: {
+    title: '⏱️ محاسبه‌گر TTK',
+    description: 'Time-to-Kill واقعی هر سلاح بر اساس HP هدف — رتبه‌بندی سریع‌ترین سلاح‌های متا',
+    icon: '🎯',
+  },
   perks: {
     title: '🎖️ Perks و متا لودآوت‌ها',
     description: 'بهترین Perk‌ها برای هر سبک بازی و لودآوت‌های آماده متا با اتچمنت‌های کامل',
@@ -88,6 +110,26 @@ const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: stri
     title: '⚙️ تنظیمات پیشنهادی',
     description: 'بهترین تنظیمات گرافیک، صدا، کنترلر و کیبورد بر اساس توصیه بازیکنان حرفه‌ای',
     icon: '🎮',
+  },
+  teambuilder: {
+    title: '👥 تیم‌ساز',
+    description: 'نقش‌های تیم را انتخاب کن — لودآوت پیشنهادی هر نقش و سینرژی بین بازیکنان',
+    icon: '🤝',
+  },
+  dropguide: {
+    title: '🪂 راهنمای Drop',
+    description: 'بهترین نقاط فرود Warzone با امتیاز لوت، میزان ترافیک و نکات استراتژیک',
+    icon: '🗺️',
+  },
+  events: {
+    title: '🎉 رویدادهای فعال',
+    description: 'رویدادها و چالش‌های جاری سیزن با تایمر زنده و ردیاب پیشرفت چالش‌ها',
+    icon: '⭐',
+  },
+  collection: {
+    title: '🏆 ردیاب کالکشن',
+    description: 'اپراتورها، بلوپرینت‌ها، کارت تماس، آرم‌ها و چارم‌هایی که داری را علامت بزن',
+    icon: '💎',
   },
 }
 
@@ -121,13 +163,19 @@ export default function Home() {
 
         {/* Tab content */}
         <div className="animate-fade-in">
+          {activeTab === 'dashboard'   && <ProgressDashboard />}
           {activeTab === 'objectives'  && <ObjectivesSection />}
           {activeTab === 'shop'        && <ShopSection />}
           {activeTab === 'loadout'     && <LoadoutBuilder />}
           {activeTab === 'meta'        && <MetaReport />}
           {activeTab === 'compare'     && <WeaponCompare />}
+          {activeTab === 'ttk'         && <TTKCalculator />}
           {activeTab === 'perks'       && <PerksGuide />}
           {activeTab === 'settings'    && <SettingsGuide />}
+          {activeTab === 'teambuilder' && <TeamBuilder />}
+          {activeTab === 'dropguide'   && <DropGuide />}
+          {activeTab === 'events'      && <ActiveEvents />}
+          {activeTab === 'collection'  && <CollectionTracker />}
           {activeTab === 'camo'        && <CamoTracker />}
           {activeTab === 'battlepass'  && <BattlePassSection />}
           {activeTab === 'patchnotes'  && <PatchNotesSection />}
