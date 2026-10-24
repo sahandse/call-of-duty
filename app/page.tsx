@@ -19,174 +19,119 @@ import ActiveEvents from './components/ActiveEvents'
 import CollectionTracker from './components/CollectionTracker'
 import TeamBuilder from './components/TeamBuilder'
 import ProgressDashboard from './components/ProgressDashboard'
+import { TABS, TabId } from './navigation'
 
-type Tab =
-  | 'dashboard'
-  | 'objectives'
-  | 'shop'
-  | 'loadout'
-  | 'meta'
-  | 'compare'
-  | 'ttk'
-  | 'perks'
-  | 'settings'
-  | 'teambuilder'
-  | 'dropguide'
-  | 'events'
-  | 'collection'
-  | 'camo'
-  | 'battlepass'
-  | 'patchnotes'
-  | 'maps'
-  | 'shophistory'
-
-const HERO_CONTENT: Record<Tab, { title: string; description: string; icon: string }> = {
-  dashboard: {
-    title: '📈 داشبورد پیشرفت',
-    description: 'خلاصه کامو، Battle Pass، کالکشن و رویدادها در یک نگاه',
-    icon: '🎮',
-  },
-  objectives: {
-    title: '🎯 اهداف و چالش‌های Call of Duty',
-    description: 'تمام مأموریت‌های روزانه، هفتگی، فصلی، سلاح، اپراتور، پاس نبرد و رتبه‌بندی — با جستجو و دسته‌بندی کامل',
-    icon: '⚔️',
-  },
-  shop: {
-    title: '🛒 آیتم شاپ روزانه',
-    description: 'آیتم‌های امروز شاپ با تایمر بروزرسانی خودکار — فیلتر بر اساس دسته‌بندی و کمیابی',
-    icon: '💎',
-  },
-  loadout: {
-    title: '🔧 لودآوت‌ساز',
-    description: 'لودآوت‌های دلخواه خود را بساز، ذخیره کن و با دوستانت به اشتراک بگذار',
-    icon: '🔫',
-  },
-  meta: {
-    title: '📊 تیر لیست متا',
-    description: 'بهترین سلاح‌های فعلی Warzone و MW3 با آمار کامل، رتبه‌بندی و بهترین اتچمنت‌ها',
-    icon: '📈',
-  },
-  camo: {
-    title: '🎨 تراکر کامو',
-    description: 'پیشرفت چالش‌های کامو سلاح‌ها را ردیابی کن — از پایه تا Polyatomic',
-    icon: '🏆',
-  },
-  battlepass: {
-    title: '🎫 Battle Pass',
-    description: 'تمام ۱۰۰ تیر پاس نبرد سیزن جاری را مشاهده کن و پیشرفتت را ثبت کن',
-    icon: '⭐',
-  },
-  patchnotes: {
-    title: '📋 پَچ نوتس',
-    description: 'آخرین بروزرسانی‌ها، بالانس سلاح‌ها، محتوای جدید و رفع باگ‌ها',
-    icon: '🔔',
-  },
-  maps: {
-    title: '🗺️ نقشه‌ها',
-    description: 'اطلاعات، نکات استراتژیک و راهنمای تمام نقشه‌های Warzone و MW3',
-    icon: '🌍',
-  },
-  shophistory: {
-    title: '🕐 تاریخچه شاپ',
-    description: 'آیتم‌های شاپ ۵ روز گذشته — اگر آیتمی را از دست دادی اینجا ببین',
-    icon: '📅',
-  },
-  compare: {
-    title: '⚖️ مقایسه سلاح‌ها',
-    description: 'دو سلاح را انتخاب کن و آمار آن‌ها را کنار هم مقایسه کن — آسیب، رنج، نرخ آتش و بیشتر',
-    icon: '🔫',
-  },
-  ttk: {
-    title: '⏱️ محاسبه‌گر TTK',
-    description: 'Time-to-Kill واقعی هر سلاح بر اساس HP هدف — رتبه‌بندی سریع‌ترین سلاح‌های متا',
-    icon: '🎯',
-  },
-  perks: {
-    title: '🎖️ Perks و متا لودآوت‌ها',
-    description: 'بهترین Perk‌ها برای هر سبک بازی و لودآوت‌های آماده متا با اتچمنت‌های کامل',
-    icon: '⚔️',
-  },
-  settings: {
-    title: '⚙️ تنظیمات پیشنهادی',
-    description: 'بهترین تنظیمات گرافیک، صدا، کنترلر و کیبورد بر اساس توصیه بازیکنان حرفه‌ای',
-    icon: '🎮',
-  },
-  teambuilder: {
-    title: '👥 تیم‌ساز',
-    description: 'نقش‌های تیم را انتخاب کن — لودآوت پیشنهادی هر نقش و سینرژی بین بازیکنان',
-    icon: '🤝',
-  },
-  dropguide: {
-    title: '🪂 راهنمای Drop',
-    description: 'بهترین نقاط فرود Warzone با امتیاز لوت، میزان ترافیک و نکات استراتژیک',
-    icon: '🗺️',
-  },
-  events: {
-    title: '🎉 رویدادهای فعال',
-    description: 'رویدادها و چالش‌های جاری سیزن با تایمر زنده و ردیاب پیشرفت چالش‌ها',
-    icon: '⭐',
-  },
-  collection: {
-    title: '🏆 ردیاب کالکشن',
-    description: 'اپراتورها، بلوپرینت‌ها، کارت تماس، آرم‌ها و چارم‌هایی که داری را علامت بزن',
-    icon: '💎',
-  },
+function Crosshair({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="24" cy="24" r="14" />
+      <circle cx="24" cy="24" r="4" />
+      <path d="M24 2v12M24 34v12M2 24h12M34 24h12" />
+    </svg>
+  )
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>('objectives')
+  const [activeTab, setActiveTab] = useState<TabId>('objectives')
 
-  const hero = HERO_CONTENT[activeTab]
+  const heroIndex = TABS.findIndex(tab => tab.id === activeTab)
+  const hero = TABS[heroIndex] ?? TABS[1]
+  const code = String(heroIndex + 1).padStart(2, '0')
 
   return (
-    <div className="min-h-screen bg-cod-bg">
-      <Header activeTab={activeTab} onTabChange={(t) => setActiveTab(t as Tab)} />
+    <div className="min-h-screen">
+      <Header activeTab={activeTab} onTabChange={tab => setActiveTab(tab as TabId)} />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Hero banner */}
-        <div className="relative rounded-2xl overflow-hidden mb-8 border border-cod-border">
-          <div className="absolute inset-0 bg-gradient-to-l from-cod-gold/10 via-transparent to-transparent" />
-          <div className="relative px-6 py-5 flex items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-white text-xl font-extrabold tracking-wide">
-                {hero.title}
-              </h2>
-              <p className="text-gray-400 text-sm">
-                {hero.description}
-              </p>
+      <main className="mx-auto max-w-7xl px-4 py-5 sm:py-6">
+        <section className="hud-frame scanlines relative mb-6 overflow-hidden">
+          <div className="hud-grid-lines pointer-events-none absolute inset-0 opacity-40" />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(115deg, rgba(201,164,76,0.05) 0px, rgba(201,164,76,0.05) 1px, transparent 1px, transparent 18px)',
+            }}
+          />
+          <div className="absolute inset-y-0 right-0 w-0.5 bg-cod-gold/70" />
+
+          <div className="relative flex flex-col gap-5 px-5 py-5 sm:px-7 sm:py-6 md:flex-row md:items-center">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 bg-cod-gold" />
+                <span className="hud-eyebrow text-cod-gold">BRIEFING // {hero.en}</span>
+                <span className="hidden h-px flex-1 bg-cod-border sm:block" />
+                <span className="hud-num hidden text-[10px] tracking-[0.2em] text-gray-600 sm:block">
+                  {code} / {String(TABS.length).padStart(2, '0')}
+                </span>
+              </div>
+
+              <h2 className="mt-3 text-xl font-black leading-snug text-gray-50 sm:text-2xl">{hero.title}</h2>
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-gray-400 sm:text-sm">{hero.description}</p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="hud-tag">MWIII</span>
+                <span className="hud-tag">WARZONE</span>
+                <span className="hud-tag border-cod-gold/40 text-cod-sand">SNAPSHOT · S05 RELOADED</span>
+                <span className="hud-tag">FA-IR</span>
+              </div>
             </div>
-            <div className="mr-auto text-5xl opacity-30 select-none hidden md:block">
-              {hero.icon}
+
+            <div className="hidden shrink-0 items-center gap-4 border-r border-cod-border pr-5 md:flex">
+              <div className="text-left">
+                <p className="hud-eyebrow text-[8px] text-gray-600">SECTION</p>
+                <p className="hud-num mt-1 text-4xl leading-none text-gray-700">{code}</p>
+              </div>
+              <Crosshair className="h-10 w-10 text-cod-gold/50" />
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Tab content */}
-        <div className="animate-fade-in">
-          {activeTab === 'dashboard'   && <ProgressDashboard />}
-          {activeTab === 'objectives'  && <ObjectivesSection />}
-          {activeTab === 'shop'        && <ShopSection />}
-          {activeTab === 'loadout'     && <LoadoutBuilder />}
-          {activeTab === 'meta'        && <MetaReport />}
-          {activeTab === 'compare'     && <WeaponCompare />}
-          {activeTab === 'ttk'         && <TTKCalculator />}
-          {activeTab === 'perks'       && <PerksGuide />}
-          {activeTab === 'settings'    && <SettingsGuide />}
+        <div key={activeTab} className="animate-fade-in">
+          {activeTab === 'dashboard' && <ProgressDashboard />}
+          {activeTab === 'objectives' && <ObjectivesSection />}
+          {activeTab === 'shop' && <ShopSection />}
+          {activeTab === 'loadout' && <LoadoutBuilder />}
+          {activeTab === 'meta' && <MetaReport />}
+          {activeTab === 'compare' && <WeaponCompare />}
+          {activeTab === 'ttk' && <TTKCalculator />}
+          {activeTab === 'perks' && <PerksGuide />}
+          {activeTab === 'settings' && <SettingsGuide />}
           {activeTab === 'teambuilder' && <TeamBuilder />}
-          {activeTab === 'dropguide'   && <DropGuide />}
-          {activeTab === 'events'      && <ActiveEvents />}
-          {activeTab === 'collection'  && <CollectionTracker />}
-          {activeTab === 'camo'        && <CamoTracker />}
-          {activeTab === 'battlepass'  && <BattlePassSection />}
-          {activeTab === 'patchnotes'  && <PatchNotesSection />}
-          {activeTab === 'maps'        && <MapsSection />}
+          {activeTab === 'dropguide' && <DropGuide />}
+          {activeTab === 'events' && <ActiveEvents />}
+          {activeTab === 'collection' && <CollectionTracker />}
+          {activeTab === 'camo' && <CamoTracker />}
+          {activeTab === 'battlepass' && <BattlePassSection />}
+          {activeTab === 'patchnotes' && <PatchNotesSection />}
+          {activeTab === 'maps' && <MapsSection />}
           {activeTab === 'shophistory' && <ShopHistory />}
         </div>
 
-        <footer className="mt-16 border-t border-cod-border pt-6 pb-4">
-          <p className="text-center text-gray-600 text-xs">
-            CoD Objectives FA — اطلاعات بر اساس فصل جاری بروزرسانی می‌شوند
-          </p>
+        <footer className="mt-14 border-t border-cod-border pt-6 pb-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="font-display text-[11px] uppercase tracking-[0.2em] text-gray-400">
+                COD ARCHIVE · FA / NOT AFFILIATED WITH ACTIVISION
+              </p>
+              <p className="mt-2 text-[11px] leading-5 text-gray-600">
+                این پروژه یک آرشیو و راهنمای غیررسمی فارسی از محتوای Modern Warfare III و Warzone تا پایان سیزن ۵
+                (سپتامبر ۲۰۲۴) است. شمارنده‌ها و پیشرفت‌ها فقط در همین مرورگر ذخیره می‌شوند؛ قیمت‌ها و دسترسی
+                آیتم‌های شاپ تاریخی‌اند و ممکن است تغییر کرده باشند.
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <span className="hud-tag">S05</span>
+              <span className="hud-tag">RELOADED</span>
+              <span className="hud-tag">2024</span>
+            </div>
+          </div>
         </footer>
       </main>
     </div>

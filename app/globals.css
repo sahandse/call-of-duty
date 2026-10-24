@@ -2,14 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------
+   Self-hosted typefaces (no external font requests at build time)
+   --------------------------------------------------------------- */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('./fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('./fonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('./fonts/Vazirmatn-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Oswald';
+  src: url('./fonts/Oswald.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-vazirmatn: 'Vazirmatn', Tahoma, Arial, sans-serif;
+  --font-sans: 'Vazirmatn', Tahoma, Arial, sans-serif;
+  --font-display: 'Oswald', 'Vazirmatn', Tahoma, sans-serif;
+  --accent: #c9a44c;
+  --panel: #141612;
+  --line: #2c3027;
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -17,56 +51,221 @@ html {
 }
 
 body {
-  background: #080808;
-  color: #ffffff;
-  font-family: var(--font-vazirmatn);
+  margin: 0;
+  background-color: #0a0b09;
+  background-image:
+    linear-gradient(rgba(201, 164, 76, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 164, 76, 0.03) 1px, transparent 1px),
+    radial-gradient(900px 520px at 88% -12%, rgba(119, 133, 90, 0.10), transparent 65%),
+    radial-gradient(700px 420px at 6% 0%, rgba(201, 164, 76, 0.05), transparent 60%);
+  background-size: 54px 54px, 54px 54px, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+  color: #e8e8e0;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #111; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #c8a415; }
-
-/* Rarity borders + glows */
-.rarity-common    { border-color: #9ca3af; }
-.rarity-rare      { border-color: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.2); }
-.rarity-epic      { border-color: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.2); }
-.rarity-legendary { border-color: #f97316; box-shadow: 0 0 12px rgba(249,115,22,0.25); }
-.rarity-ultra     { border-color: #c8a415; box-shadow: 0 0 16px rgba(200,164,21,0.4); }
-
-/* Category badge colors */
-.badge-daily       { background: rgba(59,130,246,0.15);  color: #60a5fa;  border-color: rgba(59,130,246,0.3); }
-.badge-weekly      { background: rgba(168,85,247,0.15); color: #c084fc;  border-color: rgba(168,85,247,0.3); }
-.badge-seasonal    { background: rgba(249,115,22,0.15); color: #fb923c;  border-color: rgba(249,115,22,0.3); }
-.badge-weapon      { background: rgba(234,179,8,0.15);  color: #facc15;  border-color: rgba(234,179,8,0.3); }
-.badge-operator    { background: rgba(239,68,68,0.15);  color: #f87171;  border-color: rgba(239,68,68,0.3); }
-.badge-battle_pass { background: rgba(6,182,212,0.15);  color: #22d3ee;  border-color: rgba(6,182,212,0.3); }
-.badge-ranked      { background: rgba(244,63,94,0.15);  color: #fb7185;  border-color: rgba(244,63,94,0.3); }
-
-.diff-آسان   { color: #4ade80; }
-.diff-متوسط { color: #facc15; }
-.diff-سخت   { color: #f87171; }
-
-/* Shine animation for ultra items */
-@keyframes shine {
-  0%   { transform: translateX(-100%) rotate(45deg); }
-  100% { transform: translateX(300%) rotate(45deg); }
-}
-.ultra-shine::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 40%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-  animation: shine 3s infinite;
+::selection {
+  background: rgba(201, 164, 76, 0.9);
+  color: #0a0b09;
 }
 
-/* Live pulse */
+:focus-visible {
+  outline: 2px solid rgba(201, 164, 76, 0.85);
+  outline-offset: 2px;
+}
+
+/* Scrollbars — squared, gunmetal */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0f0c;
+}
+::-webkit-scrollbar-thumb {
+  background: #33382e;
+  border: 2px solid #0d0f0c;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c9a44c;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@layer components {
+  /* Angular intel panel with corner brackets */
+  .hud-frame {
+    position: relative;
+    border: 1px solid var(--line);
+    background:
+      linear-gradient(180deg, rgba(27, 30, 25, 0.72), rgba(12, 14, 11, 0.92));
+    box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.95);
+  }
+  .hud-frame::before,
+  .hud-frame::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    border-color: rgba(201, 164, 76, 0.65);
+  }
+  .hud-frame::before {
+    top: -1px;
+    right: -1px;
+    border-top: 2px solid;
+    border-right: 2px solid;
+  }
+  .hud-frame::after {
+    bottom: -1px;
+    left: -1px;
+    border-bottom: 2px solid;
+    border-left: 2px solid;
+  }
+
+  /* Thin technical grid overlay */
+  .hud-grid-lines {
+    background-image:
+      linear-gradient(rgba(201, 164, 76, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 164, 76, 0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* CRT scanlines overlay */
+  .scanlines {
+    position: relative;
+  }
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.22) 0px,
+      rgba(0, 0, 0, 0.22) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    opacity: 0.35;
+  }
+
+  /* Uppercase HUD typography */
+  .hud-eyebrow {
+    font-family: var(--font-display);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8d9289;
+  }
+  .hud-title {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .hud-num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  /* Military tag / chip */
+  .hud-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid #353a2f;
+    background: rgba(10, 11, 9, 0.55);
+    padding: 0.15rem 0.4rem;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    color: #a9ad9f;
+  }
+
+  /* Cut-corner shape */
+  .notch {
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  }
+  .notch-sm {
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+  }
+
+  /* Primary tactical button */
+  .btn-tac {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid #c9a44c;
+    background: #c9a44c;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0a0b09;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-tac:hover {
+    background: #e9cf85;
+    border-color: #e9cf85;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid #353a2f;
+    background: rgba(20, 22, 18, 0.7);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    color: #b0b2a6;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-ghost:hover {
+    color: #f4f4ee;
+    border-color: rgba(201, 164, 76, 0.6);
+  }
+}
+
+/* Rarity accents — muted, metal-and-light instead of neon */
+.rarity-common    { border-color: #6c7266; }
+.rarity-rare      { border-color: #5f7d83; }
+.rarity-epic      { border-color: #7d6a76; }
+.rarity-legendary { border-color: #b07c44; }
+.rarity-ultra     { border-color: #c9a44c; box-shadow: inset 0 0 24px -16px rgba(201, 164, 76, 0.6); }
+
+/* Objective category tags */
+.badge-daily       { background: rgba(95, 125, 131, 0.12); color: #9db4b8; border-color: rgba(95, 125, 131, 0.35); }
+.badge-weekly      { background: rgba(125, 106, 118, 0.12); color: #b9aab5; border-color: rgba(125, 106, 118, 0.35); }
+.badge-seasonal    { background: rgba(176, 124, 68, 0.12); color: #c9975f; border-color: rgba(176, 124, 68, 0.35); }
+.badge-weapon      { background: rgba(201, 164, 76, 0.12); color: #e9cf85; border-color: rgba(201, 164, 76, 0.35); }
+.badge-operator    { background: rgba(196, 71, 47, 0.12); color: #d9705c; border-color: rgba(196, 71, 47, 0.35); }
+.badge-battle_pass { background: rgba(119, 133, 90, 0.14); color: #b5c79c; border-color: rgba(119, 133, 90, 0.4); }
+.badge-ranked      { background: rgba(141, 146, 137, 0.12); color: #b0b2a6; border-color: rgba(141, 146, 137, 0.35); }
+
+.diff-آسان   { color: #b5c79c; }
+.diff-متوسط { color: #e9cf85; }
+.diff-سخت   { color: #d9705c; }
+
+/* Legacy pulse used by countdowns / event badges */
 @keyframes livePulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+  50%      { opacity: 0.25; }
 }
-.live-dot { animation: livePulse 1.5s ease-in-out infinite; }
+.live-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Section entrance */
+.animate-fade-in {
+  animation: fadeIn 0.28s ease-out both;
+}
