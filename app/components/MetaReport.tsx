@@ -69,6 +69,8 @@ export default function MetaReport() {
       <SourceNote kind="warning" source="یادداشت‌های رسمی Activision + Charlie INTEL / Dexerto">
         اعداد ۱ تا ۱۰ هر کارت جمع‌بندی تحریری ما از همان متای سیزن ۵ است، نه آمار درون‌بازی.
         تنها ردیف‌های «تغییرات رسمی» از جدول Weapon Adjustments پچ گرفته شده‌اند.
+        فهرست بیلد هم فقط برای دو سلاح (STG44 و Static-HV) از مقالهٔ منبع‌دار آمده و در بقیه، تنها اتچمنتی نوشته شده
+        که خودِ پچ‌نوت برای همان سلاح نام برده باشد.
       </SourceNote>
 
       <div className="hud-frame bg-cod-panel p-4 space-y-3">
@@ -205,26 +207,33 @@ export default function MetaReport() {
                           )}
                         </div>
 
-                        {w.topAttachments.length > 0 && (
-                          <div>
-                            <p className="hud-eyebrow mb-1.5">بیلد پیشنهادی</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {w.topAttachments.map(a => (
-                                <span
-                                  key={a}
-                                  className="text-[11px] px-2 py-0.5 bg-cod-card2 border border-cod-border text-gray-400"
-                                >
-                                  {a}
-                                </span>
-                              ))}
-                            </div>
-                            {w.loadoutSource && (
-                              <p className="text-gray-600 text-[11px] mt-1.5">
-                                بیلد از: {w.loadoutSource}
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        <div>
+                          <p className="hud-eyebrow mb-1.5">بیلد مستند</p>
+                          {w.topAttachments.length > 0 ? (
+                            <>
+                              <div className="flex flex-wrap gap-1.5">
+                                {w.topAttachments.map(a => (
+                                  <span
+                                    key={a}
+                                    className="text-[11px] px-2 py-0.5 bg-cod-card2 border border-cod-border text-gray-400"
+                                  >
+                                    {a}
+                                  </span>
+                                ))}
+                              </div>
+                              {w.loadoutSource && (
+                                <p className="text-gray-600 text-[11px] mt-1.5">
+                                  منبع بیلد: {w.loadoutSource}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-gray-600 text-[11px] leading-relaxed">
+                              برای این سلاح بیلد مستندی در آرشیو نیست — فهرست اتچمنت فقط آنجایی نوشته می‌شود
+                              که خودِ پچ‌نوت یا مقالهٔ منبع‌دار آن را نام برده باشد.
+                            </p>
+                          )}
+                        </div>
 
                         <p className="text-gray-600 text-[11px] border-t border-cod-border pt-2">
                           منبع تغییرات: {w.verifiedBy}

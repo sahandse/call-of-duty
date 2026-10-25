@@ -1,267 +1,227 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { camoWeapons } from '../data/camoData'
+import { CamoWeapon } from '../types'
+import { CLASS_LABELS, CLASS_ORDER } from '../lib/weaponLabels'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
-type TierFilter = 'all' | 'base' | 'gold' | 'platinum' | 'polyatomic'
+type CamoTier = CamoWeapon['challenges'][number]['tier']
 
-const TIER_LABELS: Record<string, string> = {
-  base: '🟤 پایه',
-  gold: '🥇 طلایی',
-  platinum: '🔵 پلاتینیوم',
-  polyatomic: '🌈 پلی‌اتومیک',
-}
+const TIERS: { id: CamoTier; label: string; fa: string; chip: string; dot: string }[] = [
+  { id: 'base', label: 'BASE', fa: 'پایه', chip: 'text-cod-sand border-cod-sand/40 bg-cod-sand/10', dot: 'bg-cod-sand' },
+  { id: 'gilded', label: 'GILDED', fa: 'گیلدِد', chip: 'text-cod-gold border-cod-gold/40 bg-cod-gold/10', dot: 'bg-cod-gold' },
+  { id: 'forged', label: 'FORGED', fa: 'فورجِد', chip: 'text-cod-steel border-cod-steel/40 bg-cod-steel/10', dot: 'bg-cod-steel' },
+  { id: 'priceless', label: 'PRICELESS', fa: 'پرایس‌لس', chip: 'text-cod-green border-cod-green/40 bg-cod-green/10', dot: 'bg-cod-green' },
+  { id: 'interstellar', label: 'INTERSTELLAR', fa: 'اینتراستلار', chip: 'text-purple-300 border-purple-500/40 bg-purple-500/10', dot: 'bg-purple-400' },
+]
 
-const TIER_BORDER: Record<string, string> = {
-  base: 'border-amber-700/50',
-  gold: 'border-yellow-500/50',
-  platinum: 'border-blue-500/50',
-  polyatomic: 'border-purple-500/50',
-}
+const TIER_BY_ID = Object.fromEntries(TIERS.map(t => [t.id, t])) as Record<CamoTier, (typeof TIERS)[number]>
+const STORAGE_KEY = 'cod-camo-completed'
 
-const CLASS_LABELS: Record<string, string> = {
-  assault_rifle: 'رایفل اسالت',
-  smg: 'زیرماشین‌تفنگ',
-  lmg: 'مسلسل سبک',
-  sniper: 'تک‌تیرانداز',
-  marksman: 'تفنگ نشانه‌گیر',
-  shotgun: 'شاتگان',
-  handgun: 'تپانچه',
-}
-
-function getCompleted(): Set<string> {
-  if (typeof window === 'undefined') return new Set()
+function loadCompleted(): Set<string> {
   try {
-    return new Set(JSON.parse(localStorage.getItem('cod-camo-completed') || '[]'))
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return new Set(Array.isArray(raw) ? raw : [])
   } catch {
     return new Set()
   }
 }
 
-function saveCompleted(s: Set<string>) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem('cod-camo-completed', JSON.stringify(Array.from(s)))
-}
-
 export default function CamoTracker() {
   const [completed, setCompleted] = useState<Set<string>>(new Set())
-  const [selectedWeaponId, setSelectedWeaponId] = useState<string>(camoWeapons[0]?.id || '')
-  const [tierFilter, setTierFilter] = useState<TierFilter>('all')
-  const [classFilter, setClassFilter] = useState<string>('all')
+  const [selectedId, setSelectedId] = useState(camoWeapons[0]?.id ?? '')
+  const [classFilter, setClassFilter] = useState<'all' | CamoWeapon['class']>('all')
+  const [tierFilter, setTierFilter] = useState<'all' | CamoTier>('all')
+  const [query, setQuery] = useState('')
 
-  useEffect(() => {
-    setCompleted(getCompleted())
-  }, [])
+  useEffect(() => setCompleted(loadCompleted()), [])
 
-  const toggleChallenge = (challengeId: string) => {
+  function toggle(id: string) {
     setCompleted(prev => {
       const next = new Set(prev)
-      if (next.has(challengeId)) next.delete(challengeId)
-      else next.add(challengeId)
-      saveCompleted(next)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)))
       return next
     })
   }
 
-  const selectedWeapon = camoWeapons.find(w => w.id === selectedWeaponId)
+  const weapons = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return camoWeapons.filter(w => {
+      if (classFilter !== 'all' && w.class !== classFilter) return false
+      if (q && !w.name.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [classFilter, query])
 
-  const filteredChallenges = useMemo(() => {
-    if (!selectedWeapon) return []
-    return selectedWeapon.challenges.filter(c => tierFilter === 'all' || c.tier === tierFilter)
-  }, [selectedWeapon, tierFilter])
+  const selected = camoWeapons.find(w => w.id === selectedId) ?? weapons[0]
 
-  const weaponProgress = (weapon: typeof camoWeapons[0]) => {
-    const total = weapon.challenges.length
-    const done = weapon.challenges.filter(c => completed.has(c.id)).length
-    return { total, done, pct: total ? Math.round((done / total) * 100) : 0 }
-  }
-
-  const globalStats = useMemo(() => {
-    const allChallenges = camoWeapons.flatMap(w => w.challenges)
-    const totalDone = allChallenges.filter(c => completed.has(c.id)).length
-    const goldWeapons = camoWeapons.filter(w => {
-      const baseChallenges = w.challenges.filter(c => c.tier === 'base')
-      return baseChallenges.length > 0 && baseChallenges.every(c => completed.has(c.id))
+  const stats = useMemo(() => {
+    const all = camoWeapons.flatMap(w => w.challenges)
+    const done = all.filter(c => completed.has(c.id)).length
+    const interstellar = camoWeapons.filter(w => w.challenges.every(c => completed.has(c.id))).length
+    const gilded = camoWeapons.filter(w => {
+      const upToGilded = w.challenges.filter(c => c.tier !== 'forged' && c.tier !== 'priceless' && c.tier !== 'interstellar')
+      return upToGilded.length > 0 && upToGilded.every(c => completed.has(c.id))
     }).length
-    const platWeapons = camoWeapons.filter(w => {
-      const goldC = w.challenges.filter(c => c.tier === 'gold')
-      const baseC = w.challenges.filter(c => c.tier === 'base')
-      return [...goldC, ...baseC].every(c => completed.has(c.id))
-    }).length
-    return { totalDone, total: allChallenges.length, goldWeapons, platWeapons }
+    return { done, total: all.length, interstellar, gilded }
   }, [completed])
 
-  const classes = ['all', ...Array.from(new Set(camoWeapons.map(w => w.class)))]
-  const filteredWeapons = classFilter === 'all'
-    ? camoWeapons
-    : camoWeapons.filter(w => w.class === classFilter)
+  if (camoWeapons.length === 0) return null
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg flex items-center gap-2">
-          🎨 تراکر کامو
-        </h2>
-        <p className="text-gray-500 text-xs mt-0.5">
-          پیشرفت چالش‌های کامو سلاح‌ها را ردیابی کنید
-        </p>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        tab="camo"
+        title="تراکر کامو"
+        note="مسیر هر سلاح: چهار کاموی پایه، سپس Gilded، Forged، Priceless و در پایان Interstellar. پیشرفت فقط در همین مرورگر ذخیره می‌شود."
+        stats={[
+          { label: 'چالش‌ها', value: `${stats.done}/${stats.total}` },
+          { label: 'سلاح‌ها', value: camoWeapons.length },
+          { label: 'Gilded', value: stats.gilded },
+          { label: 'Interstellar', value: stats.interstellar },
+        ]}
+      />
 
-      {/* Global Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-cod-card border border-cod-border rounded-xl p-3 text-center">
-          <div className="text-white font-bold text-xl">{globalStats.totalDone}/{globalStats.total}</div>
-          <div className="text-gray-500 text-xs">چالش تکمیل شده</div>
-        </div>
-        <div className="bg-cod-card border border-cod-border rounded-xl p-3 text-center">
-          <div className="text-yellow-400 font-bold text-xl">{globalStats.goldWeapons}</div>
-          <div className="text-gray-500 text-xs">سلاح طلایی</div>
-        </div>
-        <div className="bg-cod-card border border-cod-border rounded-xl p-3 text-center">
-          <div className="text-blue-400 font-bold text-xl">{globalStats.platWeapons}</div>
-          <div className="text-gray-500 text-xs">سلاح پلاتینیوم</div>
-        </div>
-        <div className="bg-cod-card border border-cod-border rounded-xl p-3 text-center">
-          <div className="text-cod-gold font-bold text-xl">
-            {globalStats.total ? Math.round((globalStats.totalDone / globalStats.total) * 100) : 0}٪
-          </div>
-          <div className="text-gray-500 text-xs">پیشرفت کلی</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Weapon List */}
-        <div className="space-y-3">
-          {/* Class Filter */}
-          <div className="flex gap-2 flex-wrap">
-            {classes.map(c => (
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="space-y-3">
+          <div className="space-y-2 bg-cod-card p-3">
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="جستجوی سلاح…"
+              className="w-full border border-cod-border bg-cod-card2 px-3 py-1.5 text-xs text-white placeholder:text-gray-600 focus:border-cod-gold/60 focus:outline-none"
+            />
+            <div className="flex flex-wrap gap-1">
               <button
-                key={c}
-                onClick={() => setClassFilter(c)}
-                className={`px-2 py-1 rounded-lg text-xs border transition-all ${
-                  classFilter === c
-                    ? 'bg-cod-gold text-black border-cod-gold'
-                    : 'bg-cod-card border-cod-border text-gray-400 hover:border-cod-gold/40'
+                onClick={() => setClassFilter('all')}
+                className={`px-2 py-0.5 text-[11px] transition-colors ${
+                  classFilter === 'all' ? 'bg-cod-gold text-black' : 'border border-cod-border text-gray-400 hover:text-white'
                 }`}
               >
-                {c === 'all' ? 'همه' : CLASS_LABELS[c] || c}
+                همه
               </button>
-            ))}
+              {CLASS_ORDER.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setClassFilter(c)}
+                  className={`px-2 py-0.5 text-[11px] transition-colors ${
+                    classFilter === c ? 'bg-cod-gold text-black' : 'border border-cod-border text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {CLASS_LABELS[c]}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Weapon Cards */}
-          {filteredWeapons.map(weapon => {
-            const prog = weaponProgress(weapon)
-            const isSelected = selectedWeaponId === weapon.id
-            return (
-              <button
-                key={weapon.id}
-                onClick={() => setSelectedWeaponId(weapon.id)}
-                className={`w-full text-right border rounded-xl p-3 transition-all ${
-                  isSelected ? 'border-cod-gold bg-cod-card' : 'border-cod-border bg-cod-card hover:border-cod-gold/40'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="text-white font-medium text-sm">{weapon.name}</p>
-                    <p className="text-gray-500 text-xs">{weapon.classFa}</p>
-                  </div>
-                  <div className="text-left">
-                    <span className={`text-sm font-bold ${prog.pct === 100 ? 'text-green-400' : 'text-gray-400'}`}>
-                      {prog.done}/{prog.total}
+          <div className="max-h-[26rem] space-y-1 overflow-y-auto pl-1 lg:max-h-[calc(100vh-19rem)]">
+            {weapons.map(w => {
+              const done = w.challenges.filter(c => completed.has(c.id)).length
+              const pct = Math.round((done / w.challenges.length) * 100)
+              const active = selected?.id === w.id
+              return (
+                <button
+                  key={w.id}
+                  onClick={() => setSelectedId(w.id)}
+                  className={`w-full px-3 py-2 text-right transition-colors ${
+                    active ? 'border-r-2 border-cod-gold bg-cod-card2' : 'border-r-2 border-transparent bg-cod-card hover:bg-cod-card2'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-xs font-medium ${active ? 'text-white' : 'text-gray-300'}`}>{w.name}</span>
+                    <span className={`hud-num text-[10px] ${pct === 100 ? 'text-cod-green' : 'text-gray-500'}`}>
+                      {done}/{w.challenges.length}
                     </span>
                   </div>
-                </div>
-                <div className="h-1.5 bg-cod-card2 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      prog.pct === 100 ? 'bg-green-500' : 'bg-cod-gold'
-                    }`}
-                    style={{ width: `${prog.pct}%` }}
-                  />
-                </div>
-                <p className="text-gray-600 text-xs mt-1">{prog.pct}٪</p>
-              </button>
-            )
-          })}
-        </div>
+                  <div className="mt-1 h-0.5 bg-cod-border">
+                    <div className={`h-full ${pct === 100 ? 'bg-cod-green' : 'bg-cod-gold/70'}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </button>
+              )
+            })}
+            {weapons.length === 0 && <p className="px-3 py-6 text-center text-xs text-gray-500">سلاحی پیدا نشد.</p>}
+          </div>
+        </aside>
 
-        {/* Challenges Panel */}
-        <div className="lg:col-span-2 space-y-4">
-          {selectedWeapon && (
-            <>
-              <div className="flex items-center justify-between">
-                <h3 className="text-white font-bold text-base">
-                  چالش‌های {selectedWeapon.name}
-                </h3>
-                <div className="flex gap-2">
-                  {(['all', 'base', 'gold', 'platinum', 'polyatomic'] as TierFilter[]).map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setTierFilter(t)}
-                      className={`px-2 py-1 rounded-lg text-xs border transition-all ${
-                        tierFilter === t
-                          ? 'bg-cod-gold text-black border-cod-gold'
-                          : 'bg-cod-card border-cod-border text-gray-400 hover:border-cod-gold/40'
+        {selected && (
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-cod-border pb-3">
+              <div>
+                <p className="hud-tag">{selected.classFa}</p>
+                <h3 className="hud-title mt-0.5 text-lg text-white">{selected.name}</h3>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {TIERS.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTierFilter(tierFilter === t.id ? 'all' : t.id)}
+                    className={`px-2 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${
+                      tierFilter === t.id ? 'bg-white text-black' : `border ${t.chip}`
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+                {tierFilter !== 'all' && (
+                  <button
+                    onClick={() => setTierFilter('all')}
+                    className="px-2 py-0.5 text-[10px] text-gray-400 hover:text-white"
+                  >
+                    ✕ همه
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <ol className="space-y-1.5">
+              {selected.challenges.map((c, i) => {
+                const tier = TIER_BY_ID[c.tier]
+                const isDone = completed.has(c.id)
+                if (tierFilter !== 'all' && c.tier !== tierFilter) return null
+                return (
+                  <li key={c.id}>
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 border px-3 py-2.5 transition-colors ${
+                        isDone ? 'border-cod-gold/25 bg-cod-card2' : 'border-cod-border bg-cod-card hover:border-cod-border-light'
                       }`}
                     >
-                      {t === 'all' ? 'همه' : TIER_LABELS[t]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {filteredChallenges.map(challenge => {
-                  const isDone = completed.has(challenge.id)
-                  const borderClass = TIER_BORDER[challenge.tier] || 'border-cod-border'
-                  return (
-                    <button
-                      key={challenge.id}
-                      onClick={() => toggleChallenge(challenge.id)}
-                      className={`w-full text-right border rounded-xl p-4 transition-all flex items-center gap-3 ${
-                        isDone
-                          ? `${borderClass} bg-cod-card`
-                          : 'border-cod-border bg-cod-card hover:border-cod-gold/30'
-                      } ${isDone ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
-                    >
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        isDone ? 'bg-cod-gold border-cod-gold' : 'border-gray-600'
-                      }`}>
-                        {isDone && <span className="text-black text-xs font-black">✓</span>}
-                      </div>
-
-                      <div className="text-xl flex-shrink-0">{challenge.icon}</div>
-
-                      <div className="flex-1 text-right">
-                        <div className="flex items-center gap-2 justify-end mb-0.5">
-                          <span className={`text-xs px-1.5 py-0.5 rounded border ${
-                            challenge.tier === 'gold' ? 'text-yellow-400 border-yellow-700/50 bg-yellow-900/20'
-                            : challenge.tier === 'platinum' ? 'text-blue-400 border-blue-700/50 bg-blue-900/20'
-                            : challenge.tier === 'polyatomic' ? 'text-purple-400 border-purple-700/50 bg-purple-900/20'
-                            : 'text-amber-400 border-amber-700/50 bg-amber-900/20'
-                          }`}>
-                            {TIER_LABELS[challenge.tier]}
+                      <input type="checkbox" className="sr-only" checked={isDone} onChange={() => toggle(c.id)} />
+                      <span
+                        className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center border-2 text-[10px] font-black transition-colors ${
+                          isDone ? 'border-cod-gold bg-cod-gold text-black' : 'border-cod-border-light text-transparent'
+                        }`}
+                      >
+                        ✓
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className={`text-[10px] ${isDone ? 'text-gray-600' : 'text-gray-500'}`}>
+                            {String(i + 1).padStart(2, '0')}
                           </span>
-                          <p className={`font-medium text-sm ${isDone ? 'text-white line-through' : 'text-white'}`}>
-                            {challenge.nameFa}
-                          </p>
-                        </div>
-                        <p className="text-gray-400 text-xs">{challenge.descFa}</p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
+                          <span className={`text-sm font-bold ${isDone ? 'text-gray-400 line-through' : 'text-white'}`}>
+                            {c.camo}
+                          </span>
+                          <span className={`border px-1.5 text-[10px] font-bold tracking-wide ${tier.chip}`}>{tier.label}</span>
+                        </span>
+                        <span className="mt-1 block text-xs text-gray-400">{c.descFa}</span>
+                        <span className="mt-0.5 block font-mono text-[10px] text-gray-600" dir="ltr">
+                          {c.rawEn}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                )
+              })}
+            </ol>
 
-              {filteredChallenges.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <p>چالشی در این تیر یافت نشد</p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            <SourceNote kind="archive" source="TheGamer — How To Unlock Every Multiplayer Weapon Camo In Call Of Duty: Modern Warfare 3 (۲۱ سپتامبر ۲۰۲۴)">
+              شرایط هر کامو از فهرست بایگانی‌شدهٔ سیزن ۶ نقل شده است؛ تعداد دقیق در بازی ممکن است پس از آن تاریخ تغییر کرده باشد.
+            </SourceNote>
+          </section>
+        )}
       </div>
     </div>
   )

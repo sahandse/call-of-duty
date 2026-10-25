@@ -9,6 +9,8 @@ export const CLASS_LABELS: Record<WeaponClass, string> = {
   marksman: 'تفنگ نشانه‌گیر',
   shotgun: 'شاتگان',
   handgun: 'تپانچه',
+  melee: 'سلاح سرد',
+  launcher: 'پرتابگر',
 }
 
 export const CLASS_ORDER: WeaponClass[] = [
@@ -20,6 +22,8 @@ export const CLASS_ORDER: WeaponClass[] = [
   'sniper',
   'shotgun',
   'handgun',
+  'melee',
+  'launcher',
 ]
 
 export const TIER_LABEL_FA: Record<MetaTier, string> = {

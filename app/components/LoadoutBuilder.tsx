@@ -1,415 +1,446 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { loadoutWeapons, perks, lethals, tacticals, fieldUpgrades } from '../data/loadoutWeapons'
+import { useEffect, useMemo, useState } from 'react'
+import { camoWeapons } from '../data/camoData'
 import { metaWeapons } from '../data/metaWeapons'
+import { loadoutOptions, SLOT_ORDER as GEAR_SLOTS, type LoadoutOption, type LoadoutSlotId } from '../data/perksData'
+import { armoryItems, SLOT_FA } from '../data/objectives'
+import { CLASS_LABELS, CLASS_ORDER, TIER_LABEL_FA } from '../lib/weaponLabels'
 import { Loadout } from '../types'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
-const CLASS_FA: Record<string, string> = {
-  assault_rifle: 'رایفل اسالت',
-  smg: 'زیرماشین‌تفنگ',
-  lmg: 'مسلسل سبک',
-  sniper: 'تک‌تیرانداز',
-  marksman: 'تفنگ نشانه‌گیر',
-  shotgun: 'شاتگان',
-  handgun: 'تپانچه',
-}
+const STORAGE_KEY = 'cod-loadouts'
 
-const EMPTY_FORM = {
+type Draft = Omit<Loadout, 'id' | 'createdAt'>
+
+const EMPTY_DRAFT: Draft = {
   name: '',
   primary: '',
   secondary: '',
-  perks: ['', '', ''] as [string, string, string],
-  lethal: '',
+  vest: '',
+  gloves: '',
+  boots: '',
+  gear: [],
   tactical: '',
+  lethal: '',
   fieldUpgrade: '',
 }
 
-function generateId() {
-  return Math.random().toString(36).slice(2, 10)
+const WEAPONS_BY_CLASS = CLASS_ORDER.map(c => ({
+  class: c,
+  weapons: camoWeapons.filter(w => w.class === c),
+})).filter(g => g.weapons.length > 0)
+
+const GEAR_BY_SLOT = GEAR_SLOTS.map(s => ({ ...s, options: loadoutOptions.filter(o => o.slot === s.id) }))
+
+const optionsOf = (id: LoadoutSlotId) => GEAR_BY_SLOT.find(s => s.id === id)?.options ?? []
+const labelOf = (id: LoadoutSlotId) => GEAR_BY_SLOT.find(s => s.id === id)?.labelFa ?? ''
+
+const EQUIP_SELECTS: { key: 'gloves' | 'boots' | 'fieldUpgrade'; label: string; options: LoadoutOption[] }[] = (
+  ['gloves', 'boots', 'field_upgrade'] as const
+).map(id => ({
+  key: id === 'field_upgrade' ? 'fieldUpgrade' : id,
+  label: labelOf(id),
+  options: optionsOf(id),
+}))
+
+const TACTICALS = armoryItems.filter(i => i.slot === 'tactical')
+const LETHALS = armoryItems.filter(i => i.slot === 'lethal')
+
+const weaponById = new Map(camoWeapons.map(w => [w.id, w]))
+const metaById = new Map(metaWeapons.map(w => [w.id, w]))
+const gearById = new Map(loadoutOptions.map(o => [o.id, o]))
+const armoryById = new Map(armoryItems.map(i => [i.id, i]))
+
+/** برچسب یک اسلات؛ مقدارهای ذخیره‌شدهٔ قدیمی که در دیتا نیستند، همان‌طور نمایش داده می‌شوند. */
+function slotLabel(id: string, fa: boolean): string {
+  if (!id) return ''
+  return (fa ? gearById.get(id)?.nameFa ?? armoryById.get(id)?.nameFa : gearById.get(id)?.name ?? armoryById.get(id)?.name) ?? id
 }
 
-function getLoadouts(): Loadout[] {
-  if (typeof window === 'undefined') return []
+function slotDetail(id: string): string {
+  return gearById.get(id)?.descriptionFa ?? armoryById.get(id)?.descriptionFa ?? ''
+}
+
+function readLoadouts(): Loadout[] {
   try {
-    return JSON.parse(localStorage.getItem('cod-loadouts') || '[]')
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    if (!Array.isArray(raw)) return []
+    return raw
+      .filter(l => l && typeof l.id === 'string')
+      .map(l => ({
+        ...EMPTY_DRAFT,
+        ...l,
+        gear: Array.isArray(l.gear) ? l.gear : [],
+        id: l.id,
+        createdAt: typeof l.createdAt === 'string' ? l.createdAt : '',
+      }))
   } catch {
     return []
   }
 }
 
-function saveLoadouts(ls: Loadout[]) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem('cod-loadouts', JSON.stringify(ls))
-}
+const FIELD_CLASS =
+  'w-full border border-cod-border bg-cod-card2 px-2.5 py-1.5 text-xs text-white focus:border-cod-gold/60 focus:outline-none'
+const LABEL_CLASS = 'hud-tag mb-1 block'
 
 export default function LoadoutBuilder() {
   const [loadouts, setLoadouts] = useState<Loadout[]>([])
-  const [form, setForm] = useState(EMPTY_FORM)
+  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
-  const [selectedLoadout, setSelectedLoadout] = useState<string | null>(null)
 
-  useEffect(() => {
-    setLoadouts(getLoadouts())
-  }, [])
+  useEffect(() => setLoadouts(readLoadouts()), [])
 
-  const handleSave = () => {
-    if (!form.name.trim() || !form.primary) return
-    const newLoadout: Loadout = {
-      id: editing || generateId(),
-      name: form.name.trim(),
-      primary: form.primary,
-      secondary: form.secondary,
-      perks: form.perks,
-      lethal: form.lethal,
-      tactical: form.tactical,
-      fieldUpgrade: form.fieldUpgrade,
+  const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft(d => ({ ...d, [key]: value }))
+
+  function toggleGear(id: string) {
+    setDraft(d => {
+      const has = d.gear.includes(id)
+      if (has) return { ...d, gear: d.gear.filter(g => g !== id) }
+      // جلیقه‌ها حداکثر دو اسلات Gear دارند (Engineer و CCT Comms)
+      return { ...d, gear: d.gear.length >= 2 ? [...d.gear.slice(1), id] : [...d.gear, id] }
+    })
+  }
+
+  function save() {
+    if (!draft.name.trim() || !draft.primary) return
+    const record: Loadout = {
+      ...draft,
+      name: draft.name.trim(),
+      id: editing ?? Math.random().toString(36).slice(2, 10),
       createdAt: new Date().toISOString(),
     }
-    const updated = editing
-      ? loadouts.map(l => (l.id === editing ? newLoadout : l))
-      : [...loadouts, newLoadout]
-    setLoadouts(updated)
-    saveLoadouts(updated)
-    setForm(EMPTY_FORM)
+    const next = editing ? loadouts.map(l => (l.id === editing ? record : l)) : [...loadouts, record]
+    setLoadouts(next)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    setDraft(EMPTY_DRAFT)
     setEditing(null)
   }
 
-  const handleEdit = (l: Loadout) => {
-    setForm({
-      name: l.name,
-      primary: l.primary,
-      secondary: l.secondary,
-      perks: l.perks,
-      lethal: l.lethal,
-      tactical: l.tactical,
-      fieldUpgrade: l.fieldUpgrade,
-    })
-    setEditing(l.id)
-    setSelectedLoadout(null)
+  function edit(l: Loadout) {
+    const { id, createdAt, ...rest } = l
+    void createdAt
+    setDraft(rest)
+    setEditing(id)
+    setOpenId(null)
   }
 
-  const handleDelete = (id: string) => {
-    const updated = loadouts.filter(l => l.id !== id)
-    setLoadouts(updated)
-    saveLoadouts(updated)
-    if (selectedLoadout === id) setSelectedLoadout(null)
+  function remove(id: string) {
+    const next = loadouts.filter(l => l.id !== id)
+    setLoadouts(next)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    if (editing === id) {
+      setEditing(null)
+      setDraft(EMPTY_DRAFT)
+    }
+    if (openId === id) setOpenId(null)
   }
 
-  const handleShare = (l: Loadout) => {
-    const primary = loadoutWeapons.find(w => w.id === l.primary)
-    const secondary = loadoutWeapons.find(w => w.id === l.secondary)
-    const text = `لودآوت: ${l.name}
-🔫 اصلی: ${primary?.name || '-'}
-🔫 ثانوی: ${secondary?.name || '-'}
-⚡ پرک‌ها: ${l.perks.filter(Boolean).join(' / ')}
-💣 کشنده: ${l.lethal || '-'}
-🌀 تاکتیکی: ${l.tactical || '-'}
-🛡️ ارتقای میدان: ${l.fieldUpgrade || '-'}`
-    navigator.clipboard.writeText(text).then(() => {
+  function share(l: Loadout) {
+    const lines = [
+      `COD LOADOUT — ${l.name}`,
+      `PRIMARY    ${weaponById.get(l.primary)?.name ?? l.primary}`,
+      l.secondary ? `SECONDARY  ${weaponById.get(l.secondary)?.name ?? l.secondary}` : '',
+      l.vest ? `VEST       ${slotLabel(l.vest, false)}` : '',
+      l.gloves ? `GLOVES     ${slotLabel(l.gloves, false)}` : '',
+      l.boots ? `BOOTS      ${slotLabel(l.boots, false)}` : '',
+      ...l.gear.map(g => `GEAR       ${slotLabel(g, false)}`),
+      l.tactical ? `TACTICAL   ${slotLabel(l.tactical, false)}` : '',
+      l.lethal ? `LETHAL     ${slotLabel(l.lethal, false)}` : '',
+      l.fieldUpgrade ? `FIELD UPG  ${slotLabel(l.fieldUpgrade, false)}` : '',
+    ].filter(Boolean)
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
   }
 
-  const getWeaponMeta = (id: string) => metaWeapons.find(w => w.id === id)
-
-  const weaponsByClass = loadoutWeapons.reduce((acc, w) => {
-    if (!acc[w.class]) acc[w.class] = []
-    acc[w.class].push(w)
-    return acc
-  }, {} as Record<string, typeof loadoutWeapons>)
-
-  const viewedLoadout = selectedLoadout ? loadouts.find(l => l.id === selectedLoadout) : null
+  const previewMeta = useMemo(() => metaById.get(draft.primary), [draft.primary])
+  const filledSlots = useMemo(
+    () => [draft.vest, draft.gloves, draft.boots, ...draft.gear, draft.tactical, draft.lethal, draft.fieldUpgrade].filter(Boolean).length,
+    [draft],
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg flex items-center gap-2">
-          🔧 لودآوت‌ساز
-        </h2>
-        <p className="text-gray-500 text-xs mt-0.5">
-          لودآوت‌های خود را بسازید، ذخیره کنید و به اشتراک بگذارید
-        </p>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        tab="loadout"
+        title="لودآوت‌ساز"
+        note="اسلات‌ها از سیستم Gear سیزن ۵ می‌آیند: جلیقه مشخص می‌کند چند تجهیز و Gear بردارید. لودآوت فقط در همین مرورگر ذخیره می‌شود."
+        stats={[
+          { label: 'سلاح', value: camoWeapons.length },
+          { label: 'جلیقه', value: optionsOf('vest').length },
+          { label: 'Gear', value: optionsOf('gear').length },
+          { label: 'لودآوت شما', value: loadouts.length },
+        ]}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Saved Loadouts */}
-        <div className="lg:col-span-1 space-y-4">
-          <h3 className="text-white font-bold text-sm flex items-center gap-2">
-            💾 لودآوت‌های ذخیره شده
-            <span className="bg-cod-card2 text-gray-400 text-xs px-2 py-0.5 rounded-full border border-cod-border">
-              {loadouts.length}
-            </span>
-          </h3>
-
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="space-y-2">
+          <p className="hud-tag">لودآوت‌های ذخیره‌شده</p>
           {loadouts.length === 0 && (
-            <div className="bg-cod-card border border-cod-border rounded-xl p-6 text-center">
-              <div className="text-3xl mb-2">🔧</div>
-              <p className="text-gray-500 text-sm">هنوز لودآوتی ذخیره نشده</p>
-              <p className="text-gray-600 text-xs mt-1">اولین لودآوت خود را بسازید</p>
-            </div>
+            <p className="border border-cod-border bg-cod-card px-3 py-6 text-center text-xs text-gray-500">
+              هنوز لودآوتی نساخته‌اید.
+            </p>
           )}
-
-          <div className="space-y-2">
-            {loadouts.map(l => {
-              const primary = loadoutWeapons.find(w => w.id === l.primary)
-              const isSelected = selectedLoadout === l.id
-              return (
-                <div
-                  key={l.id}
-                  className={`bg-cod-card border rounded-xl p-3 cursor-pointer transition-all ${
-                    isSelected ? 'border-cod-gold' : 'border-cod-border hover:border-cod-gold/40'
-                  }`}
-                  onClick={() => setSelectedLoadout(isSelected ? null : l.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white font-medium text-sm">{l.name}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">
-                        {primary ? `${primary.name} · ${CLASS_FA[primary.class]}` : 'بدون سلاح اصلی'}
-                      </p>
-                    </div>
-                    <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => handleShare(l)}
-                        className="p-1.5 rounded-lg bg-cod-card2 border border-cod-border hover:border-cod-gold/50 text-gray-400 hover:text-white text-xs transition-all"
-                        title="اشتراک‌گذاری"
-                      >
-                        {copied ? '✅' : '📋'}
-                      </button>
-                      <button
-                        onClick={() => handleEdit(l)}
-                        className="p-1.5 rounded-lg bg-cod-card2 border border-cod-border hover:border-cod-gold/50 text-gray-400 hover:text-white text-xs transition-all"
-                        title="ویرایش"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(l.id)}
-                        className="p-1.5 rounded-lg bg-cod-card2 border border-red-900/50 hover:border-red-500/50 text-gray-400 hover:text-red-400 text-xs transition-all"
-                        title="حذف"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Expanded view */}
-                  {isSelected && viewedLoadout && (
-                    <div className="mt-3 pt-3 border-t border-cod-border space-y-2">
-                      {viewedLoadout.secondary && (
-                        <div className="text-xs text-gray-400">
-                          🔫 ثانوی: <span className="text-white">{loadoutWeapons.find(w => w.id === viewedLoadout.secondary)?.name}</span>
-                        </div>
-                      )}
-                      {viewedLoadout.perks.some(Boolean) && (
-                        <div className="text-xs text-gray-400">
-                          ⚡ پرک‌ها: <span className="text-white">{viewedLoadout.perks.filter(Boolean).join(' · ')}</span>
-                        </div>
-                      )}
-                      {viewedLoadout.lethal && (
-                        <div className="text-xs text-gray-400">
-                          💣 کشنده: <span className="text-white">{viewedLoadout.lethal}</span>
-                        </div>
-                      )}
-                      {viewedLoadout.tactical && (
-                        <div className="text-xs text-gray-400">
-                          🌀 تاکتیکی: <span className="text-white">{viewedLoadout.tactical}</span>
-                        </div>
-                      )}
-                      {viewedLoadout.fieldUpgrade && (
-                        <div className="text-xs text-gray-400">
-                          🛡️ ارتقای میدان: <span className="text-white">{viewedLoadout.fieldUpgrade}</span>
-                        </div>
-                      )}
-                      {/* Meta stats for primary */}
-                      {primary && getWeaponMeta(primary.id) && (
-                        <div className="mt-2 bg-cod-card2 rounded-lg p-2">
-                          <p className="text-cod-gold text-xs font-medium mb-1">آمار متا:</p>
-                          {(() => {
-                            const m = getWeaponMeta(primary.id)!
-                            return (
-                              <div className="grid grid-cols-2 gap-1 text-xs text-gray-400">
-                                <span>آسیب: {m.damage}/10</span>
-                                <span>رنج: {m.range}/10</span>
-                                <span>تحرک: {m.mobility}/10</span>
-                                <span>کنترل: {m.control}/10</span>
-                              </div>
-                            )
-                          })()}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Build Form */}
-        <div className="lg:col-span-2">
-          <div className="bg-cod-card border border-cod-border rounded-xl p-5 space-y-5">
-            <h3 className="text-white font-bold text-sm">
-              {editing ? '✏️ ویرایش لودآوت' : '➕ لودآوت جدید'}
-            </h3>
-
-            {/* Name */}
-            <div>
-              <label className="text-gray-400 text-xs mb-1.5 block">نام لودآوت *</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="مثلاً: لودآوت متا وارزون"
-                className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cod-gold/60 transition-colors"
-              />
-            </div>
-
-            {/* Primary Weapon */}
-            <div>
-              <label className="text-gray-400 text-xs mb-1.5 block">🔫 سلاح اصلی *</label>
-              <select
-                value={form.primary}
-                onChange={e => setForm(f => ({ ...f, primary: e.target.value }))}
-                className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
+          {loadouts.map(l => {
+            const weapon = weaponById.get(l.primary)
+            const meta = metaById.get(l.primary)
+            const open = openId === l.id
+            return (
+              <div
+                key={l.id}
+                className={`notch border bg-cod-card p-3 ${open ? 'border-cod-gold/40' : 'border-cod-border'}`}
               >
-                <option value="">انتخاب سلاح اصلی...</option>
-                {Object.entries(weaponsByClass).map(([cls, weapons]) => (
-                  <optgroup key={cls} label={CLASS_FA[cls] || cls}>
-                    {weapons.map(w => (
-                      <option key={w.id} value={w.id}>{w.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              {form.primary && getWeaponMeta(form.primary) && (
-                <div className="mt-2 bg-cod-card2 rounded-lg p-2 flex gap-3 text-xs text-gray-400">
-                  {(() => {
-                    const m = getWeaponMeta(form.primary)!
-                    return <>
-                      <span>تیر {m.tier}</span>
-                      <span>آسیب {m.damage}/10</span>
-                      <span>رنج {m.range}/10</span>
-                      <span className={m.trending === 'up' ? 'text-green-400' : m.trending === 'down' ? 'text-red-400' : ''}>
-                        {m.trending === 'up' ? '📈' : m.trending === 'down' ? '📉' : '➡️'}
+                <button className="w-full text-right" onClick={() => setOpenId(open ? null : l.id)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-bold text-white">{l.name}</span>
+                    {meta && (
+                      <span className="hud-num border border-cod-gold/40 px-1.5 text-[10px] text-cod-gold-light">
+                        TIER {meta.tier}
                       </span>
-                    </>
-                  })()}
-                </div>
-              )}
+                    )}
+                  </div>
+                  <p className="mt-0.5 font-mono text-[10px] text-gray-500" dir="ltr">
+                    {weapon?.name ?? l.primary}
+                    {l.secondary ? ` · ${weaponById.get(l.secondary)?.name ?? l.secondary}` : ''}
+                  </p>
+                </button>
+
+                {open && (
+                  <ul className="mt-2 space-y-1 border-t border-cod-border pt-2">
+                    {(
+                      [
+                        ['جلیقه', l.vest],
+                        ['دستکش', l.gloves],
+                        ['چکمه', l.boots],
+                        ['Gear', l.gear.map(g => slotLabel(g, true)).filter(Boolean).join(' + ')],
+                        ['تاکتیکی', slotLabel(l.tactical, true)],
+                        ['مرگبار', slotLabel(l.lethal, true)],
+                        ['ارتقای میدانی', slotLabel(l.fieldUpgrade, true)],
+                      ] as [string, string][]
+                    )
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => (
+                        <li key={k} className="flex items-baseline justify-between gap-2 text-[11px]">
+                          <span className="hud-tag shrink-0">{k}</span>
+                          <span className="text-left text-gray-300">{v}</span>
+                        </li>
+                      ))}
+                    <li className="flex gap-2 pt-2">
+                      <button onClick={() => share(l)} className="btn-tac flex-1">کپی</button>
+                      <button onClick={() => edit(l)} className="btn-tac flex-1">ویرایش</button>
+                      <button
+                        onClick={() => remove(l.id)}
+                        className="border border-cod-red/40 px-2 py-1 text-[11px] text-cod-red hover:bg-cod-red/10"
+                      >
+                        حذف
+                      </button>
+                    </li>
+                  </ul>
+                )}
+              </div>
+            )
+          })}
+        </aside>
+
+        <div className="space-y-4">
+          <div className="hud-frame space-y-4 bg-cod-panel p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="hud-title text-base text-white">{editing ? 'ویرایش لودآوت' : 'لودآوت جدید'}</h3>
+              <span className="hud-num text-[11px] text-gray-500">{filledSlots}/7 اسلات پر شده</span>
             </div>
 
-            {/* Secondary Weapon */}
-            <div>
-              <label className="text-gray-400 text-xs mb-1.5 block">🔫 سلاح ثانوی</label>
-              <select
-                value={form.secondary}
-                onChange={e => setForm(f => ({ ...f, secondary: e.target.value }))}
-                className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
-              >
-                <option value="">انتخاب سلاح ثانوی...</option>
-                {Object.entries(weaponsByClass).map(([cls, weapons]) => (
-                  <optgroup key={cls} label={CLASS_FA[cls] || cls}>
-                    {weapons.map(w => (
-                      <option key={w.id} value={w.id}>{w.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className={LABEL_CLASS}>نام لودآوت</label>
+                <input
+                  value={draft.name}
+                  onChange={e => set('name', e.target.value)}
+                  placeholder="مثلاً راش نزدیک‌برد"
+                  className={FIELD_CLASS}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>سلاح اصلی</label>
+                <select value={draft.primary} onChange={e => set('primary', e.target.value)} className={FIELD_CLASS}>
+                  <option value="">انتخاب…</option>
+                  {WEAPONS_BY_CLASS.map(g => (
+                    <optgroup key={g.class} label={CLASS_LABELS[g.class]}>
+                      {g.weapons.map(w => (
+                        <option key={w.id} value={w.id}>{w.name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>سلاح ثانوی / melee</label>
+                <select value={draft.secondary} onChange={e => set('secondary', e.target.value)} className={FIELD_CLASS}>
+                  <option value="">بدون سلاح ثانوی</option>
+                  {WEAPONS_BY_CLASS.map(g => (
+                    <optgroup key={g.class} label={CLASS_LABELS[g.class]}>
+                      {g.weapons.map(w => (
+                        <option key={w.id} value={w.id}>{w.name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>جلیقه (تعیین‌کنندهٔ اسلات‌ها)</label>
+                <select value={draft.vest} onChange={e => set('vest', e.target.value)} className={FIELD_CLASS}>
+                  <option value="">انتخاب…</option>
+                  {optionsOf('vest').map(o => (
+                    <option key={o.id} value={o.id}>{o.nameFa}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Perks */}
-            <div>
-              <label className="text-gray-400 text-xs mb-1.5 block">⚡ پرک‌ها (۳ عدد)</label>
-              <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2].map(i => (
+            {draft.vest && gearById.get(draft.vest)?.slotsFa && (
+              <p className="border-r-2 border-cod-gold/50 bg-cod-card px-3 py-1.5 text-[11px] text-gray-400">
+                {gearById.get(draft.vest)!.slotsFa}
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {EQUIP_SELECTS.map(({ key, label, options }) => (
+                <div key={key}>
+                  <label className={LABEL_CLASS}>{label}</label>
                   <select
-                    key={i}
-                    value={form.perks[i]}
-                    onChange={e => {
-                      const updated = [...form.perks] as [string, string, string]
-                      updated[i] = e.target.value
-                      setForm(f => ({ ...f, perks: updated }))
-                    }}
-                    className="w-full bg-cod-card2 border border-cod-border rounded-lg px-2 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
+                    value={draft[key]}
+                    onChange={e => set(key, e.target.value)}
+                    className={FIELD_CLASS}
                   >
-                    <option value="">پرک {i + 1}...</option>
-                    {perks.map(p => (
-                      <option key={p} value={p}>{p}</option>
+                    <option value="">انتخاب…</option>
+                    {options.map(o => (
+                      <option key={o.id} value={o.id}>{o.nameFa}</option>
                     ))}
                   </select>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
 
-            {/* Lethal & Tactical */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">💣 کشنده</label>
-                <select
-                  value={form.lethal}
-                  onChange={e => setForm(f => ({ ...f, lethal: e.target.value }))}
-                  className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
-                >
-                  <option value="">انتخاب...</option>
-                  {lethals.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">🌀 تاکتیکی</label>
-                <select
-                  value={form.tactical}
-                  onChange={e => setForm(f => ({ ...f, tactical: e.target.value }))}
-                  className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
-                >
-                  <option value="">انتخاب...</option>
-                  {tacticals.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {([['tactical', TACTICALS], ['lethal', LETHALS]] as const).map(([slot, list]) => (
+                <div key={slot}>
+                  <label className={LABEL_CLASS}>{SLOT_FA[slot]}</label>
+                  <select
+                    value={slot === 'tactical' ? draft.tactical : draft.lethal}
+                    onChange={e => set(slot, e.target.value)}
+                    className={FIELD_CLASS}
+                  >
+                    <option value="">انتخاب…</option>
+                    {list.map(i => (
+                      <option key={i.id} value={i.id}>{i.nameFa} — {i.requireFa}</option>
+                    ))}
+                  </select>
+                </div>
+              ))}
             </div>
 
-            {/* Field Upgrade */}
             <div>
-              <label className="text-gray-400 text-xs mb-1.5 block">🛡️ ارتقای میدانی</label>
-              <select
-                value={form.fieldUpgrade}
-                onChange={e => setForm(f => ({ ...f, fieldUpgrade: e.target.value }))}
-                className="w-full bg-cod-card2 border border-cod-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cod-gold/60 transition-colors"
-              >
-                <option value="">انتخاب...</option>
-                {fieldUpgrades.map(fu => <option key={fu} value={fu}>{fu}</option>)}
-              </select>
+              <label className={LABEL_CLASS}>{`${labelOf('gear')} (حداکثر دو عدد)`}</label>
+              <div className="flex flex-wrap gap-1.5">
+                {optionsOf('gear')
+                  .map(o => {
+                    const on = draft.gear.includes(o.id)
+                    return (
+                      <button
+                        key={o.id}
+                        onClick={() => toggleGear(o.id)}
+                        title={o.descriptionFa}
+                        className={`px-2 py-1 text-[11px] transition-colors ${
+                          on ? 'bg-cod-gold text-black' : 'border border-cod-border text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        {o.nameFa}
+                      </button>
+                    )
+                  })}
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-wrap gap-2">
               <button
-                onClick={handleSave}
-                disabled={!form.name.trim() || !form.primary}
-                className="flex-1 py-2.5 rounded-lg bg-cod-gold text-black font-bold text-sm hover:bg-cod-gold-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={save}
+                disabled={!draft.name.trim() || !draft.primary}
+                className="btn-tac flex-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {editing ? '💾 ذخیره تغییرات' : '💾 ذخیره لودآوت'}
+                {editing ? 'ذخیرهٔ تغییرات' : 'ذخیرهٔ لودآوت'}
               </button>
               {editing && (
                 <button
-                  onClick={() => { setForm(EMPTY_FORM); setEditing(null) }}
-                  className="px-4 py-2.5 rounded-lg bg-cod-card2 border border-cod-border text-gray-400 hover:text-white text-sm transition-colors"
+                  onClick={() => {
+                    setDraft(EMPTY_DRAFT)
+                    setEditing(null)
+                  }}
+                  className="btn-tac"
                 >
-                  لغو
+                  انصراف
                 </button>
               )}
             </div>
           </div>
+
+          {(previewMeta || draft.gear.length > 0 || draft.vest) && (
+            <div className="space-y-2">
+              <p className="hud-tag">پیش‌نمایش</p>
+              {previewMeta && (
+                <div className="notch border border-cod-border bg-cod-card p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="hud-num border border-cod-gold/40 px-1.5 text-[10px] text-cod-gold-light">
+                      TIER {previewMeta.tier}
+                    </span>
+                    <span className="text-sm font-bold text-white">{previewMeta.name}</span>
+                    <span className="hud-tag">{TIER_LABEL_FA[previewMeta.tier]}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-gray-400">{previewMeta.bestFor}</p>
+                  <p className="mt-1 font-mono text-[10px] text-gray-600">
+                    امتیاز تحریری ۱–۱۰ (نه عدد درون‌بازی): damage {previewMeta.damage} · range {previewMeta.range} · fireRate{' '}
+                    {previewMeta.fireRate} · mobility {previewMeta.mobility} · control {previewMeta.control}
+                  </p>
+                </div>
+              )}
+              <ul className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                {[
+                  draft.vest,
+                  draft.gloves,
+                  draft.boots,
+                  ...draft.gear,
+                  draft.tactical,
+                  draft.lethal,
+                  draft.fieldUpgrade,
+                ]
+                  .filter(Boolean)
+                  .map(id => {
+                    const detail = slotDetail(id)
+                    if (!detail) return null
+                    return (
+                      <li key={id} className="border-r-2 border-cod-border bg-cod-card px-3 py-2">
+                        <p className="text-[11.5px] font-bold text-white">{slotLabel(id, true)}</p>
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-gray-400">{detail}</p>
+                      </li>
+                    )
+                  })}
+              </ul>
+            </div>
+          )}
+
+          <SourceNote kind="verified" source="یادداشت‌های سیزن ۵ ریلُود + فهرست تجهیزات MW3">
+            اسلات‌ها و توضیح هر Gear از دادهٔ تأییدشدهٔ سیزن ۵ خوانده شده است؛ جلیقه تعیین می‌کند چند اسلات تجهیز و Gear
+            داشته باشید و بعضی جلیقه‌ها اسلات‌ها را حذف یا اضافه می‌کنند.
+          </SourceNote>
         </div>
       </div>
 
       {copied && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white text-sm px-4 py-2 rounded-full shadow-lg z-50">
-          ✅ لودآوت در کلیپ‌بورد کپی شد
-        </div>
+        <p className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 border border-cod-gold bg-cod-panel px-4 py-2 text-xs text-cod-gold">
+          لودآوت در کلیپ‌بورد کپی شد
+        </p>
       )}
     </div>
   )

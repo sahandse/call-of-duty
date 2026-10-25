@@ -1,30 +1,4 @@
-export type ObjectiveType =
-  | 'daily'
-  | 'weekly'
-  | 'seasonal'
-  | 'weapon'
-  | 'operator'
-  | 'battle_pass'
-  | 'ranked'
-
 export type GameMode = 'warzone' | 'mw3' | 'both'
-export type Difficulty = 'آسان' | 'متوسط' | 'سخت'
-export type Rarity = 'معمولی' | 'نادر' | 'حماسی' | 'افسانه‌ای' | 'فوق‌العاده'
-
-export interface Objective {
-  id: string
-  title: string
-  description: string
-  type: ObjectiveType
-  typeFa: string
-  game: GameMode
-  gameFa: string
-  xp: number
-  difficulty: Difficulty
-  maxProgress: number
-  tags: string[]
-  weaponClass?: string
-}
 
 export type StoreKind = 'bundle' | 'battle_pass' | 'blackcell' | 'vault'
 
@@ -51,6 +25,8 @@ export type WeaponClass =
   | 'marksman'
   | 'shotgun'
   | 'handgun'
+  | 'melee'
+  | 'launcher'
 export type MetaTier = 'S' | 'A' | 'B' | 'C' | 'D'
 export type PatchTag = 'S5' | 'S5R'
 
@@ -80,22 +56,17 @@ export interface MetaWeapon {
   trending: 'up' | 'down' | 'stable'
 }
 
-export interface LoadoutWeapon {
-  id: string
-  name: string
-  class: WeaponClass
-  classFa: string
-  game: GameMode
-}
-
 export interface Loadout {
   id: string
   name: string
   primary: string
   secondary: string
-  perks: [string, string, string]
-  lethal: string
+  vest: string
+  gloves: string
+  boots: string
+  gear: string[]
   tactical: string
+  lethal: string
   fieldUpgrade: string
   createdAt: string
 }
@@ -151,9 +122,9 @@ export interface CamoWeapon {
   classFa: string
   challenges: {
     id: string
-    nameFa: string
+    camo: string
+    tier: 'base' | 'gilded' | 'forged' | 'priceless' | 'interstellar'
+    rawEn: string
     descFa: string
-    tier: 'base' | 'gold' | 'platinum' | 'polyatomic'
-    icon: string
   }[]
 }

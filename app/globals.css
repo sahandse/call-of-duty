@@ -243,19 +243,6 @@ body {
 .rarity-legendary { border-color: #b07c44; }
 .rarity-ultra     { border-color: #c9a44c; box-shadow: inset 0 0 24px -16px rgba(201, 164, 76, 0.6); }
 
-/* Objective category tags */
-.badge-daily       { background: rgba(95, 125, 131, 0.12); color: #9db4b8; border-color: rgba(95, 125, 131, 0.35); }
-.badge-weekly      { background: rgba(125, 106, 118, 0.12); color: #b9aab5; border-color: rgba(125, 106, 118, 0.35); }
-.badge-seasonal    { background: rgba(176, 124, 68, 0.12); color: #c9975f; border-color: rgba(176, 124, 68, 0.35); }
-.badge-weapon      { background: rgba(201, 164, 76, 0.12); color: #e9cf85; border-color: rgba(201, 164, 76, 0.35); }
-.badge-operator    { background: rgba(196, 71, 47, 0.12); color: #d9705c; border-color: rgba(196, 71, 47, 0.35); }
-.badge-battle_pass { background: rgba(119, 133, 90, 0.14); color: #b5c79c; border-color: rgba(119, 133, 90, 0.4); }
-.badge-ranked      { background: rgba(141, 146, 137, 0.12); color: #b0b2a6; border-color: rgba(141, 146, 137, 0.35); }
-
-.diff-آسان   { color: #b5c79c; }
-.diff-متوسط { color: #e9cf85; }
-.diff-سخت   { color: #d9705c; }
-
 /* Legacy pulse used by countdowns / event badges */
 @keyframes livePulse {
   0%, 100% { opacity: 1; }

@@ -175,15 +175,19 @@ export default function WeaponCompare() {
                   <p className="text-gray-300 text-sm">{w.bestFor}</p>
                 </div>
                 <div>
-                  <p className="hud-eyebrow mb-1">بیلد پیشنهادی</p>
-                  <ul className="space-y-1">
-                    {w.topAttachments.map(a => (
-                      <li key={a} className="text-xs text-gray-400 flex gap-2">
-                        <span className="text-cod-gold">›</span>
-                        {a}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="hud-eyebrow mb-1">بیلد مستند</p>
+                  {w.topAttachments.length === 0 ? (
+                    <p className="text-gray-600 text-xs">بیلد مستندی برای این سلاح در آرشیو نیست.</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {w.topAttachments.map(a => (
+                        <li key={a} className="text-xs text-gray-400 flex gap-2">
+                          <span className="text-cod-gold">›</span>
+                          {a}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div>
                   <p className="hud-eyebrow mb-1">تغییرات رسمی</p>

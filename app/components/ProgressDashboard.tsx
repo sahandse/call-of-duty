@@ -4,12 +4,15 @@ import { camoWeapons } from '../data/camoData'
 import { battlePassSectors } from '../data/battlePassData'
 import { season5Events } from '../data/eventsData'
 import { collectionItems } from '../data/collectionData'
+import { armoryItems } from '../data/objectives'
 import SectionHeader from './SectionHeader'
 import SourceNote from './SourceNote'
 
 interface Stats {
   camoCompleted: number
   camoTotal: number
+  armoryDone: number
+  armoryTotal: number
   bpUnlocked: number
   bpTotal: number
   bpSectors: number
@@ -65,6 +68,7 @@ export default function ProgressDashboard() {
     return {
       camoTotal,
       bpTotal,
+      armoryTotal: armoryItems.length,
       collectionTotal: collectionItems.length,
       eventsTotal: season5Events.length,
     }
@@ -74,6 +78,7 @@ export default function ProgressDashboard() {
     if (typeof window === 'undefined') return
 
     const camoCompleted = readArray('cod-camo-completed').length
+    const armoryDone = readArray('cod-armory-unlocked').length
     const bpUnlocked = readArray('cod-battlepass-unlocked').length
     const bpSectors = new Set(
       readArray('cod-battlepass-unlocked').map(k => String(k).split('#')[0])
@@ -85,6 +90,8 @@ export default function ProgressDashboard() {
     setStats({
       camoCompleted,
       camoTotal: totals.camoTotal,
+      armoryDone,
+      armoryTotal: totals.armoryTotal,
       bpUnlocked,
       bpTotal: totals.bpTotal,
       bpSectors,
@@ -100,6 +107,7 @@ export default function ProgressDashboard() {
     if (!stats) return 0
     const parts = [
       stats.camoTotal > 0 ? stats.camoCompleted / stats.camoTotal : 0,
+      stats.armoryTotal > 0 ? stats.armoryDone / stats.armoryTotal : 0,
       stats.bpTotal > 0 ? stats.bpUnlocked / stats.bpTotal : 0,
       stats.collectionTotal > 0 ? stats.collectionOwned / stats.collectionTotal : 0,
       stats.eventsTotal > 0 ? stats.eventsDone / stats.eventsTotal : 0,
@@ -111,7 +119,7 @@ export default function ProgressDashboard() {
     'این داشبورد فقط چیزی را می‌خواند که خودت در همان مرورگر علامت زده‌ای — هیچ حسابی به بازی متصل نیست.',
     'سیزن ۵ در ۲۴ ژوئیه ۲۰۲۴ شروع و در ۱۸ سپتامبر ۲۰۲۴ تمام شد؛ همه‌ی بخش‌های «آرشیو» همین بازه را پوشش می‌دهند.',
     'برای دیدن اعداد رسمی بالانس (آسیب، برد، Rate of Fire) تب «پچ‌نوتس» را باز کن.',
-    'تراکر کامو و پاس نبرد کلید ذخیره‌سازی جدا دارند؛ پاک کردن داده‌های مرورگر همه را صفر می‌کند.',
+    'پنج تراکر کلید ذخیره‌سازی جدا دارند (کامو، Armory، پاس نبرد، کالکشن، رویدادها)؛ پاک کردن داده‌های مرورگر همه را صفر می‌کند.',
   ]
 
   return (
@@ -119,7 +127,7 @@ export default function ProgressDashboard() {
       <SectionHeader
         tab="dashboard"
         title="داشبورد پیشرفت"
-        note="خلاصه‌ی تراکرهای محلی تو — کامو، پاس نبرد، کالکشن و رویدادهای ثبت‌شده."
+        note="خلاصه‌ی تراکرهای محلی تو — کامو، آزادسازی Armory، پاس نبرد، کالکشن و رویدادهای ثبت‌شده."
         stats={[
           { label: 'کلی', value: `${overall}%` },
           { label: 'لودآوت', value: stats ? stats.loadouts : 0 },
@@ -130,7 +138,7 @@ export default function ProgressDashboard() {
         <div className="flex items-end justify-between mb-3">
           <div>
             <p className="hud-eyebrow mb-1">پیشرفت کلی</p>
-            <p className="text-gray-500 text-xs">میانگین چهار تراکر</p>
+            <p className="text-gray-500 text-xs">میانگین پنج تراکر</p>
           </div>
           <span className="hud-num text-4xl font-black text-cod-gold">{overall}%</span>
         </div>
@@ -145,13 +153,14 @@ export default function ProgressDashboard() {
       {stats ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard label="چالش‌های کامو" value={stats.camoCompleted} max={stats.camoTotal} bar="bg-cod-gold" />
+          <StatCard label="آزادسازی Armory" value={stats.armoryDone} max={stats.armoryTotal} bar="bg-cod-gold-light" />
           <StatCard label="جوایز پاس نبرد" value={stats.bpUnlocked} max={stats.bpTotal} bar="bg-cod-green" />
           <StatCard label="آیتم کالکشن" value={stats.collectionOwned} max={stats.collectionTotal} bar="bg-cod-sand" />
           <StatCard label="رویدادهای ثبت‌شده" value={stats.eventsDone} max={stats.eventsTotal} bar="bg-cod-steel" />
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="hud-frame bg-cod-card h-28 animate-pulse" />
           ))}
         </div>

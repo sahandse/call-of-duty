@@ -1,485 +1,285 @@
-import { Objective } from '../types'
+import { weeklyChallengesS5 } from './shopHistory'
 
-export const objectives: Objective[] = [
-  // ─────────────────────────────────────────────
-  // مأموریت‌های روزانه (Daily)
-  // ─────────────────────────────────────────────
-  {
-    id: 'd01', title: 'کشتار با رایفل حمله',
-    description: '۱۰ کشتار با هر رایفل حمله در هر حالت بازی انجام دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 2500, difficulty: 'آسان', maxProgress: 10, tags: ['رایفل', 'کشتار'],
-  },
-  {
-    id: 'd02', title: 'احیای هم‌تیمی',
-    description: 'در وارزون ۵ بار هم‌تیمی خود را از حالت مرگ نجات دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'warzone', gameFa: 'وارزون',
-    xp: 2000, difficulty: 'آسان', maxProgress: 5, tags: ['احیا', 'تیمی'],
-  },
-  {
-    id: 'd03', title: 'تکمیل قرارداد',
-    description: 'در وارزون ۳ قرارداد را با موفقیت تکمیل کنید',
-    type: 'daily', typeFa: 'روزانه', game: 'warzone', gameFa: 'وارزون',
-    xp: 3000, difficulty: 'متوسط', maxProgress: 3, tags: ['قرارداد', 'وارزون'],
-  },
-  {
-    id: 'd04', title: 'آسیب با اسنایپر',
-    description: '۵۰۰ آسیب با هر تفنگ تک‌تیراندaz وارد کنید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 3000, difficulty: 'متوسط', maxProgress: 500, tags: ['اسنایپر', 'آسیب'],
-  },
-  {
-    id: 'd05', title: 'کشتار با پیستول',
-    description: '۱۰ کشتار با هر پیستول در حالت‌های چندنفره انجام دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 2000, difficulty: 'آسان', maxProgress: 10, tags: ['پیستول', 'کشتار'],
-  },
-  {
-    id: 'd06', title: 'حرکت پایانی',
-    description: 'در هر حالتی ۲ بار Finishing Move انجام دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 3500, difficulty: 'متوسط', maxProgress: 2, tags: ['finishing move', 'خاص'],
-  },
-  {
-    id: 'd07', title: 'برنده گولاگ',
-    description: 'در وارزون ۵ بار از دوئل گولاگ پیروز شوید',
-    type: 'daily', typeFa: 'روزانه', game: 'warzone', gameFa: 'وارزون',
-    xp: 4000, difficulty: 'سخت', maxProgress: 5, tags: ['گولاگ', 'پیروزی'],
-  },
-  {
-    id: 'd08', title: 'هدف به سر',
-    description: 'در بازی ۲۰ بار به سر دشمن شلیک موفق داشته باشید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 3500, difficulty: 'متوسط', maxProgress: 20, tags: ['headshot', 'هدف‌گیری'],
-  },
-  {
-    id: 'd09', title: 'آسیب با SMG',
-    description: '۱۰۰۰ آسیب با هر مسلسل دست‌کوچک وارد کنید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 2500, difficulty: 'آسان', maxProgress: 1000, tags: ['SMG', 'آسیب'],
-  },
-  {
-    id: 'd10', title: 'کشتار سریع',
-    description: 'در ۱۰ ثانیه ۳ کشتار متوالی انجام دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 4500, difficulty: 'سخت', maxProgress: 1, tags: ['کشتار', 'سریع', 'خاص'],
-  },
-  {
-    id: 'd11', title: 'بازی تیمی',
-    description: 'در ۳ مسابقه جداگانه با هم‌تیمی خود بازی کنید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 2000, difficulty: 'آسان', maxProgress: 3, tags: ['تیمی', 'بازی'],
-  },
-  {
-    id: 'd12', title: 'کشتار با شاتگان',
-    description: '۵ کشتار با هر شاتگان در فاصله کوتاه انجام دهید',
-    type: 'daily', typeFa: 'روزانه', game: 'both', gameFa: 'هر دو',
-    xp: 2500, difficulty: 'آسان', maxProgress: 5, tags: ['شاتگان', 'کشتار'],
-  },
+// ─────────────────────────────────────────────────────────────
+// آبجکتیوها — دو مجموعهٔ ثابت و قابل‌استناد:
+//   ۱) هزینهٔ آزادسازی تجهیزات در سیستم Armory Unlock
+//   ۲) پاداش‌های هفتگی سیزن ۵ (بایگانی)
+// چالش‌های روزانه/هفتگیِ زندهٔ بازی هر بار جابه‌جا می‌شوند و اینجا
+// جعل نشده‌اند؛ برای جزئیات به armoryNotes نگاه کنید.
+// ─────────────────────────────────────────────────────────────
 
-  // ─────────────────────────────────────────────
-  // مأموریت‌های هفتگی (Weekly)
-  // ─────────────────────────────────────────────
+export type ArmorySlot = 'tactical' | 'lethal' | 'field_upgrade'
+
+export const SLOT_FA: Record<ArmorySlot, string> = {
+  tactical: 'تجهیز تاکتیکی',
+  lethal: 'تجهیز مرگبار',
+  field_upgrade: 'ارتقای میدانی',
+}
+
+export const SLOT_ORDER: ArmorySlot[] = ['tactical', 'lethal', 'field_upgrade']
+
+export interface ArmoryItem {
+  id: string
+  name: string
+  nameFa: string
+  slot: ArmorySlot
+  requires: { level?: number; armoryChallenges?: number }
+  requireFa: string
+  descriptionFa: string
+}
+
+export const armoryItems: ArmoryItem[] = [
+  // ── Tactical ──
   {
-    id: 'w01', title: 'کشتار در Battle Royale',
-    description: 'در حالت Battle Royale مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['battle royale', 'کشتار'],
+    id: 'tac-stun', name: 'Stun Grenade', nameFa: 'نارنجک فلج‌کننده', slot: 'tactical',
+    requires: {}, requireFa: 'پیش‌فرض باز',
+    descriptionFa: 'حرکت و نشانه‌گیری قربانی را کند می‌کند.',
   },
   {
-    id: 'w02', title: 'قرارداد هفتگی',
-    description: 'در طول هفته ۱۰ قرارداد در وارزون تکمیل کنید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 8000, difficulty: 'متوسط', maxProgress: 10, tags: ['قرارداد'],
+    id: 'tac-battle-rage', name: 'Battle Rage', nameFa: 'بتل ریج', slot: 'tactical',
+    requires: { level: 13 }, requireFa: 'سطح ۱۳',
+    descriptionFa:
+      'محرک آزمایشی آدرنالین: جان سریع باز می‌گردد، در برابر تجهیزات تاکتیکی مقاومت می‌گیرید و تاکتیکال اسپرینت همیشه فعال می‌ماند.',
   },
   {
-    id: 'w03', title: 'سه برد در وارزون',
-    description: 'در حالت‌های مختلف وارزون ۳ بار اول شوید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 15000, difficulty: 'سخت', maxProgress: 3, tags: ['برد', 'اول', 'وارزون'],
+    id: 'tac-smoke', name: 'Smoke Grenade', nameFa: 'نارنجک دود', slot: 'tactical',
+    requires: { level: 16 }, requireFa: 'سطح ۱۶',
+    descriptionFa: 'دیوار دودی که دید و سیستم‌های هدف‌گیری خودکار را می‌بندد.',
   },
   {
-    id: 'w04', title: 'کشتار با LMG',
-    description: 'با هر مسلسل سنگین ۲۵ کشتار انجام دهید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'both', gameFa: 'هر دو',
-    xp: 9000, difficulty: 'متوسط', maxProgress: 25, tags: ['LMG', 'کشتار'],
+    id: 'tac-scatter-mine', name: 'Scatter Mine', nameFa: 'مین پراکنده', slot: 'tactical',
+    requires: { level: 18 }, requireFa: 'سطح ۱۸',
+    descriptionFa: 'میدانی از مین روی ناحیه‌ای گسترده می‌اندازد که با نزدیک شدن دشمن منفجر می‌شود.',
   },
   {
-    id: 'w05', title: 'برنده‌های گولاگ',
-    description: 'در ۵ مرحله گولاگ مختلف پیروز شوید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 5, tags: ['گولاگ', 'پیروزی'],
+    id: 'tac-decoy', name: 'Decoy Grenade', nameFa: 'نارنجک فریب', slot: 'tactical',
+    requires: { level: 42 }, requireFa: 'سطح ۴۲',
+    descriptionFa: 'صدای شلیک، حرکت و امضای راداری شبیه‌سازی می‌کند تا دشمن را گیج کند.',
   },
   {
-    id: 'w06', title: 'بازی‌های متنوع',
-    description: 'در ۱۵ مسابقه مختلف در هر حالتی شرکت کنید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'both', gameFa: 'هر دو',
-    xp: 5000, difficulty: 'آسان', maxProgress: 15, tags: ['بازی', 'شرکت'],
+    id: 'tac-flash', name: 'Flash Grenade', nameFa: 'نارنجک چشم‌خواری', slot: 'tactical',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'موقتاً دید و شنوایی هدف را از بین می‌برد.',
   },
   {
-    id: 'w07', title: 'کشتار با خودرو',
-    description: 'با خودرو ۵ دشمن را در وارزون نابود کنید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 8000, difficulty: 'متوسط', maxProgress: 5, tags: ['خودرو', 'کشتار'],
+    id: 'tac-emd', name: 'EMD Grenade', nameFa: 'نارنجک EMD', slot: 'tactical',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'دستگاه ردیاب به دشمنِ برخوردکرده می‌چسباند و او را روی مینی‌مپ تیم نشان می‌دهد.',
   },
   {
-    id: 'w08', title: 'آسیب با شاتگان',
-    description: '۱۵۰۰ آسیب با هر شاتگان در طول هفته وارد کنید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'both', gameFa: 'هر دو',
-    xp: 7000, difficulty: 'متوسط', maxProgress: 1500, tags: ['شاتگان', 'آسیب'],
+    id: 'tac-shock-stick', name: 'Shock Stick', nameFa: 'چسب برق', slot: 'tactical',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'دستگاه برقی چسبان؛ دشمن را برق‌گرفته می‌کند، تجهیزات را از کار می‌اندازد و خودرو را از کنترل خارج می‌کند.',
   },
   {
-    id: 'w09', title: 'رسیدن به ۱۰ نفر برتر',
-    description: 'در ۵ مسابقه battle royale در ۱۰ نفر برتر باقی بمانید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 9000, difficulty: 'متوسط', maxProgress: 5, tags: ['top 10', 'بقا'],
+    id: 'tac-stim', name: 'Stim', nameFa: 'استیم', slot: 'tactical',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'محرک نظامی که زخم را سریع می‌بندد و تاکتیکال اسپرینت را ریفرش می‌کند.',
   },
   {
-    id: 'w10', title: 'تأمین مجدد هم‌تیمی',
-    description: 'به ۱۰ هم‌تیمی منابع یا مهمات برسانید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 7000, difficulty: 'متوسط', maxProgress: 10, tags: ['تیمی', 'منابع'],
+    id: 'tac-tear-gas', name: 'Tear Gas', nameFa: 'گاز اشک‌آور', slot: 'tactical',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'با برخورد به زمین می‌ترکد و ابری ماندگار می‌سازد: حرکت کند، دید تار و سرفه.',
   },
   {
-    id: 'w11', title: 'کشتار از راه دور',
-    description: 'با مارکسمن رایفل یا اسنایپر ۱۵ کشتار از فاصله دور انجام دهید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'سخت', maxProgress: 15, tags: ['اسنایپر', 'مارکسمن', 'از دور'],
-  },
-  {
-    id: 'w12', title: 'بقای ۱۰ دقیقه',
-    description: 'در ۳ مسابقه battle royale حداقل ۱۰ دقیقه زنده بمانید',
-    type: 'weekly', typeFa: 'هفتگی', game: 'warzone', gameFa: 'وارزون',
-    xp: 8000, difficulty: 'متوسط', maxProgress: 3, tags: ['بقا', 'زمان'],
+    id: 'tac-snapshot', name: 'Snapshot Grenade', nameFa: 'نارنجک اسنپ‌شات', slot: 'tactical',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'برای لحظه‌ای، دشمنان داخل شعاع انفجار را برای تیم یا اسکواد شما علامت می‌زند.',
   },
 
-  // ─────────────────────────────────────────────
-  // مأموریت‌های فصلی (Seasonal)
-  // ─────────────────────────────────────────────
+  // ── Lethal ──
   {
-    id: 's01', title: 'قهرمان فصل',
-    description: 'در طول فصل ۲۵۰ کشتار کل انجام دهید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'both', gameFa: 'هر دو',
-    xp: 25000, difficulty: 'متوسط', maxProgress: 250, tags: ['فصلی', 'کشتار'],
+    id: 'leth-frag', name: 'Frag Grenade', nameFa: 'نارنجک ترکشی', slot: 'lethal',
+    requires: {}, requireFa: 'پیش‌فرض باز',
+    descriptionFa: 'نارنجک ترکشی قابل‌پخت (cookable).',
   },
   {
-    id: 's02', title: 'متخصص قرارداد',
-    description: 'در طول فصل ۵۰ قرارداد تکمیل کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 20000, difficulty: 'متوسط', maxProgress: 50, tags: ['قرارداد', 'فصلی'],
+    id: 'leth-claymore', name: 'Claymore', nameFa: 'کلمور', slot: 'lethal',
+    requires: { level: 8 }, requireFa: 'سطح ۸',
+    descriptionFa: 'مین فعال‌شونده با نزدیکی دشمن.',
   },
   {
-    id: 's03', title: 'ده برد فصل',
-    description: 'در هر حالت وارزون ۱۰ بار اول شوید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 35000, difficulty: 'سخت', maxProgress: 10, tags: ['برد', 'فصلی'],
+    id: 'leth-throwing-knife', name: 'Throwing Knife', nameFa: 'چاقوی پرتابی', slot: 'lethal',
+    requires: { level: 30 }, requireFa: 'سطح ۳۰',
+    descriptionFa: 'چاقوی پرتابی قابل‌بازگرداندن؛ در مودهای Core کشندهٔ مستقیم.',
   },
   {
-    id: 's04', title: 'امداد تیمی',
-    description: 'در طول فصل ۱۰۰ بار هم‌تیمی را احیا کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 25000, difficulty: 'متوسط', maxProgress: 100, tags: ['احیا', 'تیمی'],
+    id: 'leth-thermite', name: 'Thermite', nameFa: 'ترمیت', slot: 'lethal',
+    requires: { level: 33 }, requireFa: 'سطح ۳۳',
+    descriptionFa: 'دستگاه آتش‌زای چسبان که به همهٔ سطوح می‌چسبد.',
   },
   {
-    id: 's05', title: 'سرباز تجربه‌دار',
-    description: 'در ۵۰ مسابقه مختلف در ۲۵ نفر برتر باقی بمانید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 20000, difficulty: 'متوسط', maxProgress: 50, tags: ['top 25', 'فصلی'],
+    id: 'leth-thermobaric', name: 'Thermobaric Grenade', nameFa: 'نارنجک ترموباریک', slot: 'lethal',
+    requires: { level: 53 }, requireFa: 'سطح ۵۳',
+    descriptionFa:
+      'قابل‌پخت؛ انفجار بزرگ با فلج موقت و پس‌ماندهٔ آتشین که قدرت انفجارات را برای مدتی زیاد می‌کند.',
   },
   {
-    id: 's06', title: 'تسلط بر سلاح‌ها',
-    description: 'با هر ۶ دسته سلاح اصلی حداقل ۵ کشتار انجام دهید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'both', gameFa: 'هر دو',
-    xp: 30000, difficulty: 'سخت', maxProgress: 6, tags: ['سلاح', 'متنوع'],
+    id: 'leth-semtex', name: 'Semtex', nameFa: 'سمتکس', slot: 'lethal',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'نارنجک چسبان با تایمر.',
   },
   {
-    id: 's07', title: 'خلبان جنگی',
-    description: 'در مسابقات وارزون ۵۰۰ آسیب با هلیکوپتر وارد کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 25000, difficulty: 'سخت', maxProgress: 500, tags: ['هلیکوپتر', 'خودرو'],
+    id: 'leth-drill-charge', name: 'Drill Charge', nameFa: 'شارژ دریل', slot: 'lethal',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'شارژی با نیزهٔ حرارتی که داخل سطح حفاری می‌کند و بعد منفجر می‌شود.',
   },
   {
-    id: 's08', title: 'ستاره‌های قرارداد',
-    description: 'در طول فصل ۱۰۰ ستاره قرارداد کسب کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 30000, difficulty: 'متوسط', maxProgress: 100, tags: ['قرارداد', 'ستاره'],
+    id: 'leth-breacher-drone', name: 'Breacher Drone', nameFa: 'پهپاد نفوذی', slot: 'lethal',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'پهپاد انفجاری که با نزدیکی دشمن یا برخورد منفجر می‌شود.',
   },
   {
-    id: 's09', title: 'رویدادهای ویژه',
-    description: 'در ۱۰ رویداد ویژه فصلی شرکت کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'both', gameFa: 'هر دو',
-    xp: 20000, difficulty: 'متوسط', maxProgress: 10, tags: ['رویداد', 'فصلی'],
+    id: 'leth-c4', name: 'C4', nameFa: 'سی۴', slot: 'lethal',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'انفجاری بزرگ و چسبان که پس از نصب، از راه دور قابل منفجرکردن است.',
   },
   {
-    id: 's10', title: 'بازی گروهی',
-    description: 'در ۲۰ مسابقه با گروه ۳ نفره یا بیشتر بازی کنید',
-    type: 'seasonal', typeFa: 'فصلی', game: 'warzone', gameFa: 'وارزون',
-    xp: 15000, difficulty: 'آسان', maxProgress: 20, tags: ['تیمی', 'گروهی'],
+    id: 'leth-proximity-mine', name: 'Proximity Mine', nameFa: 'مین نزدیکی', slot: 'lethal',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'با نزدیکی دشمن به هوا پرتاب می‌شود و به ناحیهٔ اطراف آسیب سنگین می‌زند.',
+  },
+  {
+    id: 'leth-throwing-star', name: 'Throwing Star', nameFa: 'ستارهٔ پرتابی', slot: 'lethal',
+    requires: { level: 55 }, requireFa: 'سطح ۵۵ و ۵۰ کشتن با چاقوی پرتابی',
+    descriptionFa: 'ستارهٔ پرتابی سریع و کشنده که روی هدف اثر زخم‌کنندگی می‌گذارد.',
   },
 
-  // ─────────────────────────────────────────────
-  // چالش‌های سلاح (Weapon)
-  // ─────────────────────────────────────────────
+  // ── Field Upgrades ──
   {
-    id: 'wp01', title: 'تسلط بر M4',
-    description: 'با رایفل M4 مجموعاً ۵۰ کشتار در هر حالتی انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['M4', 'رایفل حمله'], weaponClass: 'رایفل حمله',
+    id: 'fu-munitions', name: 'Munitions Box', nameFa: 'جعبهٔ مهمات', slot: 'field_upgrade',
+    requires: {}, requireFa: 'پیش‌فرض باز',
+    descriptionFa: 'جعبهٔ مهمات و تجهیزات برای شما و هم‌تیمی‌ها.',
   },
   {
-    id: 'wp02', title: 'تسلط بر MCW',
-    description: 'با رایفل MCW مجموعاً ۵۰ کشتار در هر حالتی انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['MCW', 'رایفل حمله'], weaponClass: 'رایفل حمله',
+    id: 'fu-comm-scrambler', name: 'Comm Scrambler', nameFa: 'بِرزنندهٔ ارتباط', slot: 'field_upgrade',
+    requires: { level: 6 }, requireFa: 'سطح ۶',
+    descriptionFa:
+      'ارتباط دشمن با اطلاعات را داخل شعاع قطع می‌کند؛ دشمن نمی‌تواند کیل‌استریک فعال کند و UAV او شما را نمی‌بیند. موقعیت بِرزَننده روی مینی‌مپ دشمن قابل مشاهده است.',
   },
   {
-    id: 'wp03', title: 'تسلط بر TAQ-56',
-    description: 'با رایفل TAQ-56 مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['TAQ-56', 'رایفل حمله'], weaponClass: 'رایفل حمله',
+    id: 'fu-deployable-cover', name: 'Deployable Cover', nameFa: 'سپر قابل‌حمل', slot: 'field_upgrade',
+    requires: { level: 22 }, requireFa: 'سطح ۲۲',
+    descriptionFa: 'پوشش بالیستیک با نصب سریع.',
   },
   {
-    id: 'wp04', title: 'تسلط بر Vaznev-9K',
-    description: 'با Vaznev-9K مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['Vaznev-9K', 'SMG'], weaponClass: 'SMG',
+    id: 'fu-acs', name: 'A.C.S.', nameFa: 'اسپایک کامپیوتری خودکار', slot: 'field_upgrade',
+    requires: { level: 28 }, requireFa: 'سطح ۲۸',
+    descriptionFa:
+      'نقاط را آرام تصاحب و دستگاه‌های دشمن را موقت هک می‌کند. در Domination، Hardpoint، Control و Ground War اثر دارد.',
   },
   {
-    id: 'wp05', title: 'تسلط بر Vel 46',
-    description: 'با Vel 46 مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['Vel 46', 'SMG'], weaponClass: 'SMG',
+    id: 'fu-portable-radar', name: 'Portable Radar', nameFa: 'رادار قابل‌حمل', slot: 'field_upgrade',
+    requires: { level: 41 }, requireFa: 'سطح ۴۱',
+    descriptionFa: 'پینگ دوره‌ای برای کشف دشمنان نزدیک.',
   },
   {
-    id: 'wp06', title: 'تسلط بر MCPR-300',
-    description: 'با اسنایپر MCPR-300 مجموعاً ۳۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'سخت', maxProgress: 30, tags: ['MCPR-300', 'اسنایپر'], weaponClass: 'اسنایپر',
+    id: 'fu-tactical-insertion', name: 'Tactical Insertion', nameFa: 'لنگرگاه تاکتیکی', slot: 'field_upgrade',
+    requires: { level: 45 }, requireFa: 'سطح ۴۵',
+    descriptionFa: 'محل اسپاون بعدی شما را علامت می‌زند؛ در مودهای تک‌جانی اثری ندارد.',
   },
   {
-    id: 'wp07', title: 'تسلط بر Signal 50',
-    description: 'با اسنایپر Signal 50 مجموعاً ۳۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'سخت', maxProgress: 30, tags: ['Signal 50', 'اسنایپر'], weaponClass: 'اسنایپر',
+    id: 'fu-smoke-airdrop', name: 'Smoke Airdrop', nameFa: 'اینداخت دود', slot: 'field_upgrade',
+    requires: { level: 51 }, requireFa: 'سطح ۵۱',
+    descriptionFa: 'ناوگانی از پهپادها را به پرواز درمی‌آورد تا در نقطهٔ هدف دیوار دود بسازند.',
   },
   {
-    id: 'wp08', title: 'تسلط بر Raal MG',
-    description: 'با Raal MG مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['Raal MG', 'LMG'], weaponClass: 'LMG',
+    id: 'fu-med-box', name: 'Med Box', nameFa: 'جعبهٔ پزشکی', slot: 'field_upgrade',
+    requires: { level: 55 }, requireFa: 'سطح ۵۵',
+    descriptionFa: 'جعبهٔ تجهیزات پزشکی که زمان بهبود شما و هم‌تیمی‌ها را کم می‌کند.',
   },
   {
-    id: 'wp09', title: 'تسلط بر HCR 56',
-    description: 'با HCR 56 مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['HCR 56', 'LMG'], weaponClass: 'LMG',
+    id: 'fu-trophy', name: 'Trophy System', nameFa: 'سیستم تروفی', slot: 'field_upgrade',
+    requires: { armoryChallenges: 3 }, requireFa: '۳ چالش Armory Unlock',
+    descriptionFa: 'سپر خودکار که تا سه تجهیز یا پرتابهٔ دشمن را منهدم می‌کند؛ اهداف بزرگ‌تر ممکن است چند شلیک بگیرند.',
   },
   {
-    id: 'wp10', title: 'تسلط بر Lockwood 680',
-    description: 'با Lockwood 680 مجموعاً ۳۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'آسان', maxProgress: 30, tags: ['Lockwood 680', 'شاتگان'], weaponClass: 'شاتگان',
+    id: 'fu-anti-armor', name: 'Anti-Armor Rounds', nameFa: 'مهمات ضدزره', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa:
+      'مهمات با آسیب اضافه به اهداف زرهی: خودرو، تجهیزات، بالیستیک و اهداف پشت پوشش‌های قابل‌نفوذ.',
   },
   {
-    id: 'wp11', title: 'تسلط بر X13 Auto',
-    description: 'با پیستول X13 Auto مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'آسان', maxProgress: 50, tags: ['X13 Auto', 'پیستول'], weaponClass: 'پیستول',
+    id: 'fu-suppression-mine', name: 'Suppression Mine', nameFa: 'مین سرکوب', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'مینی که با فعال شدن موج صوتی پیوسته می‌فرستد، دید دشمن را برهم و حرکتش را کند می‌کند.',
   },
   {
-    id: 'wp12', title: 'تسلط بر SP-X 80',
-    description: 'با مارکسمن رایفل SP-X 80 مجموعاً ۳۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'سخت', maxProgress: 30, tags: ['SP-X 80', 'مارکسمن'], weaponClass: 'مارکسمن',
+    id: 'fu-recon-drone', name: 'Recon Drone', nameFa: 'پهپاد شناسایی', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'پهپاد کنترل‌دستی با قابلیت علامت‌گذاری خودکار دشمن.',
   },
   {
-    id: 'wp13', title: 'موشک‌انداز',
-    description: 'با هر موشک‌انداز ۲۰ کشتار یا تخریب وسیله نقلیه انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'متوسط', maxProgress: 20, tags: ['موشک‌انداز', 'پرتابی'], weaponClass: 'پرتابی',
+    id: 'fu-ddos', name: 'DDoS', nameFa: 'دی‌داس', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'دستگاهی که الکترونیک و حسگرهای دشمن را در ناحیهٔ اطراف برای مدت کوتاه از کار می‌اندازد.',
   },
   {
-    id: 'wp14', title: 'استاد نزدیک',
-    description: 'با سلاح سرد ۲۰ کشتار از نزدیک انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'سخت', maxProgress: 20, tags: ['سلاح سرد', 'نزدیک'], weaponClass: 'سلاح سرد',
+    id: 'fu-tac-camera', name: 'Tactical Camera', nameFa: 'دوربین تاکتیکی', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa:
+      'یک بار پرتاب کنید، بار دوم وصل شوید و دشمن را علامت بزنید؛ رهاشده، ناحیه را زیر نظر می‌گیرد و با صدا هشدار می‌دهد.',
   },
   {
-    id: 'wp15', title: 'سلاح جدید فصل',
-    description: 'با سلاح جدید فصل ۱۰ کشتار انجام دهید',
-    type: 'weapon', typeFa: 'سلاح', game: 'both', gameFa: 'هر دو',
-    xp: 12000, difficulty: 'متوسط', maxProgress: 10, tags: ['جدید', 'فصلی', 'سلاح'],
-  },
-
-  // ─────────────────────────────────────────────
-  // چالش‌های اپراتور (Operator)
-  // ─────────────────────────────────────────────
-  {
-    id: 'op01', title: 'نیکتو در میدان',
-    description: 'با اپراتور Nikto در ۱۰ مسابقه مختلف بازی کنید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'آسان', maxProgress: 10, tags: ['Nikto', 'اپراتور'],
+    id: 'fu-inflatable-decoy', name: 'Inflatable Decoy', nameFa: 'طعمهٔ بادی', slot: 'field_upgrade',
+    requires: { armoryChallenges: 5 }, requireFa: '۵ چالش Armory Unlock',
+    descriptionFa: 'مین نزدیکی فریب‌دهنده؛ با فعال شدن، هدف پارچه‌ای تقویت‌شده با شدت باز می‌شود تا حواس دشمن را پرت کند.',
   },
   {
-    id: 'op02', title: 'هورانگی پیروز',
-    description: 'با اپراتور Horangi در ۵ مسابقه برنده شوید',
-    type: 'operator', typeFa: 'اپراتور', game: 'warzone', gameFa: 'وارزون',
-    xp: 12000, difficulty: 'سخت', maxProgress: 5, tags: ['Horangi', 'برد'],
+    id: 'fu-dead-silence', name: 'Dead Silence', nameFa: 'سکوت مطلق', slot: 'field_upgrade',
+    requires: { armoryChallenges: 8 }, requireFa: '۸ چالش Armory Unlock',
+    descriptionFa:
+      'صدای پا موقتاً حذف و اثر Ghost اعمال می‌شود؛ کیل با سلاح، میله‌ای یا چاقوی پرتابی مدت آن را تمدید می‌کند.',
   },
   {
-    id: 'op03', title: 'کشتارهای اپراتور',
-    description: 'با هر اپراتوری که دارید ۵۰ کشتار انجام دهید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['اپراتور', 'کشتار'],
+    id: 'fu-heartbeat', name: 'Heartbeat Sensor', nameFa: 'حسگر ضربان', slot: 'field_upgrade',
+    requires: { armoryChallenges: 8 }, requireFa: '۸ چالش Armory Unlock',
+    descriptionFa: 'تبلت با تعداد استفادهٔ محدود که اطلاعات تقریبی از دشمنان نزدیک می‌دهد.',
   },
   {
-    id: 'op04', title: 'اپراتور جدید',
-    description: 'با اپراتور جدید فصل در یک مسابقه شرکت کنید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 5000, difficulty: 'آسان', maxProgress: 1, tags: ['جدید', 'فصلی'],
-  },
-  {
-    id: 'op05', title: 'تنوع اپراتور',
-    description: 'با ۳ اپراتور مختلف هر کدام ۵ مسابقه بازی کنید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 7000, difficulty: 'آسان', maxProgress: 3, tags: ['اپراتور', 'تنوع'],
-  },
-  {
-    id: 'op06', title: 'کشتارهای ویژه',
-    description: 'با اپراتور ویژه فصل ۲۰ کشتار خاص انجام دهید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 15000, difficulty: 'سخت', maxProgress: 20, tags: ['کشتار خاص', 'اپراتور'],
-  },
-  {
-    id: 'op07', title: 'لباس نظامی',
-    description: 'با اسکین پیش‌فرض اپراتور در ۱۵ مسابقه بازی کنید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 5000, difficulty: 'آسان', maxProgress: 15, tags: ['پیش‌فرض', 'اپراتور'],
-  },
-  {
-    id: 'op08', title: 'آدریسی فعال',
-    description: 'با اپراتور Adrissi در ۸ مسابقه مختلف بازی کنید',
-    type: 'operator', typeFa: 'اپراتور', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'آسان', maxProgress: 8, tags: ['Adrissi', 'اپراتور'],
-  },
-
-  // ─────────────────────────────────────────────
-  // پاس نبرد (Battle Pass)
-  // ─────────────────────────────────────────────
-  {
-    id: 'bp01', title: 'ارتقا به سطح ۱۰',
-    description: 'پاس نبرد را به سطح ۱۰ ارتقا دهید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 5000, difficulty: 'آسان', maxProgress: 10, tags: ['پاس نبرد', 'سطح'],
-  },
-  {
-    id: 'bp02', title: 'ارتقا به سطح ۲۵',
-    description: 'پاس نبرد را به سطح ۲۵ ارتقا دهید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 8000, difficulty: 'آسان', maxProgress: 25, tags: ['پاس نبرد', 'سطح'],
-  },
-  {
-    id: 'bp03', title: 'ارتقا به سطح ۵۰',
-    description: 'پاس نبرد را به سطح ۵۰ ارتقا دهید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['پاس نبرد', 'سطح'],
-  },
-  {
-    id: 'bp04', title: 'ارتقا به سطح ۷۵',
-    description: 'پاس نبرد را به سطح ۷۵ ارتقا دهید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 15000, difficulty: 'متوسط', maxProgress: 75, tags: ['پاس نبرد', 'سطح'],
-  },
-  {
-    id: 'bp05', title: 'تکمیل پاس نبرد',
-    description: 'پاس نبرد را به سطح ۱۰۰ برسانید و همه جوایز را دریافت کنید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 25000, difficulty: 'سخت', maxProgress: 100, tags: ['پاس نبرد', 'تکمیل'],
-  },
-  {
-    id: 'bp06', title: 'توکن‌های تجربه',
-    description: 'در طول فصل ۲۵۰ توکن XP مضاعف کسب کنید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 5000, difficulty: 'آسان', maxProgress: 250, tags: ['XP', 'توکن'],
-  },
-  {
-    id: 'bp07', title: 'ستاره‌های فصلی',
-    description: 'تمام مراحل ستاره فصل را با موفقیت کامل کنید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 20000, difficulty: 'سخت', maxProgress: 1, tags: ['ستاره', 'فصلی'],
-  },
-  {
-    id: 'bp08', title: 'باندل ویژه',
-    description: 'پاس نبرد را خریداری و باندل ویژه را فعال‌سازی کنید',
-    type: 'battle_pass', typeFa: 'پاس نبرد', game: 'both', gameFa: 'هر دو',
-    xp: 30000, difficulty: 'سخت', maxProgress: 1, tags: ['باندل', 'ویژه', 'خرید'],
-  },
-
-  // ─────────────────────────────────────────────
-  // بازی رتبه‌بندی (Ranked)
-  // ─────────────────────────────────────────────
-  {
-    id: 'r01', title: 'شروع رتبه‌بندی',
-    description: 'در ۱۰ مسابقه رتبه‌بندی شرکت کنید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 5000, difficulty: 'آسان', maxProgress: 10, tags: ['ranked', 'رتبه'],
-  },
-  {
-    id: 'r02', title: 'رتبه برنز',
-    description: 'در بازی رتبه‌بندی به رتبه برنز دست یابید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 5000, difficulty: 'آسان', maxProgress: 1, tags: ['برنز', 'رتبه'],
-  },
-  {
-    id: 'r03', title: 'رتبه نقره',
-    description: 'در بازی رتبه‌بندی به رتبه نقره دست یابید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 8000, difficulty: 'متوسط', maxProgress: 1, tags: ['نقره', 'رتبه'],
-  },
-  {
-    id: 'r04', title: 'رتبه طلا',
-    description: 'در بازی رتبه‌بندی به رتبه طلا دست یابید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 12000, difficulty: 'متوسط', maxProgress: 1, tags: ['طلا', 'رتبه'],
-  },
-  {
-    id: 'r05', title: 'رتبه پلاتینیوم',
-    description: 'در بازی رتبه‌بندی به رتبه پلاتینیوم دست یابید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 18000, difficulty: 'سخت', maxProgress: 1, tags: ['پلاتینیوم', 'رتبه'],
-  },
-  {
-    id: 'r06', title: 'رتبه الماس',
-    description: 'در بازی رتبه‌بندی به رتبه الماس دست یابید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 25000, difficulty: 'سخت', maxProgress: 1, tags: ['الماس', 'رتبه'],
-  },
-  {
-    id: 'r07', title: 'کشتار در ranked',
-    description: 'در بازی‌های رتبه‌بندی مجموعاً ۵۰ کشتار انجام دهید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 10000, difficulty: 'متوسط', maxProgress: 50, tags: ['ranked', 'کشتار'],
-  },
-  {
-    id: 'r08', title: 'برد ranked',
-    description: 'در بازی‌های رتبه‌بندی ۳ بار اول شوید',
-    type: 'ranked', typeFa: 'رتبه‌بندی', game: 'warzone', gameFa: 'وارزون',
-    xp: 15000, difficulty: 'سخت', maxProgress: 3, tags: ['ranked', 'برد'],
+    id: 'fu-loadout-drop', name: 'Loadout Drop', nameFa: 'اینداخت لودآوت', slot: 'field_upgrade',
+    requires: { armoryChallenges: 8 }, requireFa: '۸ چالش Armory Unlock',
+    descriptionFa: 'کرایت تیمی با تعداد استفادهٔ محدود — هر بازیکن فقط یک بار.',
   },
 ]
 
-export const typeLabels: Record<string, { fa: string; icon: string }> = {
-  daily:       { fa: 'روزانه',      icon: '🌅' },
-  weekly:      { fa: 'هفتگی',       icon: '📅' },
-  seasonal:    { fa: 'فصلی',        icon: '🏆' },
-  weapon:      { fa: 'سلاح',        icon: '🔫' },
-  operator:    { fa: 'اپراتور',     icon: '🪖' },
-  battle_pass: { fa: 'پاس نبرد',   icon: '🎫' },
-  ranked:      { fa: 'رتبه‌بندی',  icon: '🏅' },
+export const armoryNotes = {
+  source: 'Game8 — List of Equipment: Tactical, Lethal, and Field Upgrades (Call of Duty MW3)',
+  howItWorksFa:
+    'سیستم Armory Unlock از سطح ۲۵ حساب باز می‌شود. بعضی تجهیزات با رسیدن به یک سطح خاص آزاد می‌شوند و بعضی با کامل کردن ۳، ۵ یا ۸ چالش Armory Unlock؛ هر دو مسیر در جدول بالا جدا از هم نگه داشته شده‌اند.',
+  dailyNoteFa:
+    'چالش‌های روزانه و هفتگیِ خودِ بازی هر بار جابه‌جا می‌شوند، پس این صفحه شمارهٔ XP یا هدف ساختگی برای آن‌ها نمی‌نویسد. آنچه ثابت و قابل‌بازبینی است، همان هزینهٔ آزادسازی تجهیزات و پاداش‌های هفتگی سیزن ۵ است.',
+  archiveNoteFa:
+    'پاداش‌های هفتگی مربوط به سیزن ۵ (ژوئیه تا سپتامبر ۲۰۲۴) است و به‌عنوان بایگانی نمایش داده می‌شود، نه چالش جاری.',
 }
 
-export const gameLabels: Record<string, { fa: string; color: string }> = {
-  warzone: { fa: 'وارزون',  color: 'text-green-400' },
-  mw3:     { fa: 'MW3',     color: 'text-blue-400' },
-  both:    { fa: 'هر دو',  color: 'text-gray-400' },
+export interface WeeklyReward {
+  id: string
+  week: number
+  date: string
+  dateFa: string
+  reward: string
+  weapon: string
+  rewardFa: string
 }
+
+const WEEK_DATES_FA = [
+  '۲ تا ۸ مرداد',
+  '۹ تا ۱۵ مرداد',
+  '۱۶ تا ۲۲ مرداد',
+  '۲۳ تا ۲۹ مرداد',
+  '۳۰ مرداد تا ۵ شهریور',
+  '۶ تا ۱۲ شهریور',
+  '۱۳ تا ۱۹ شهریور',
+  '۲۰ تا ۲۶ شهریور',
+]
+
+export const weeklyRewards: WeeklyReward[] = weeklyChallengesS5.map((w, i) => ({
+  id: `s5-week-${w.week}`,
+  week: w.week,
+  date: w.date,
+  dateFa: WEEK_DATES_FA[i] ?? '',
+  reward: w.reward,
+  weapon: w.weapon,
+  rewardFa: w.rewardFa,
+}))
