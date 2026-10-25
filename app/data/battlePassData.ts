@@ -1,126 +1,434 @@
-import { BattlePassItem } from '../types'
+import { BattlePassSector } from '../types'
 
-export const currentSeason = 'سیزن ۵: حماسه تاریکی'
-export const seasonEnds = '2024-11-06'
+export const battlePassMeta = {
+  season: 'SEASON 05',
+  seasonFa: 'سیزن ۵ (۲۰۲۴)',
+  liveFrom: '2024-07-24',
+  reloadedOn: '2024-08-21',
+  lastEventEnds: '2024-09-18',
+  premiumPriceCp: 1100,
+  maxCpReturn: 1400,
+  rewardCount: '100+',
+  sectorCount: 20,
+  blueprintCount: 20,
+  commonRewards: [
+    'XP Tokenها و بلوپرینت‌های سلاح (تا ۲۰ بلوپرینت در پاس پریمیوم)',
+    'کارت ویزیت، آرم، استیکر، دکال بزرگ و Finishing Move',
+    'یک Weapon Charm و مقادیر CoD Point در طول مسیر',
+    'آیتم‌های Zombies: Aether Tools، Aetherium Crystal، Ray Gun Weapon Case و Ammo Mod به نام Shatter Blast',
+  ],
+}
 
-export const battlePassItems: BattlePassItem[] = [
-  // Tier 1-10
-  { tier: 1,  free: true,  rewardFa: 'اسکین اپراتور — Ghost Shadow',      type: 'operator_skin',  icon: '👤', rarity: 'افسانه‌ای' },
-  { tier: 2,  free: false, rewardFa: '۵,۰۰۰ XP توکن (یک ساعته)',         type: 'xp_token',       icon: '⭐' },
-  { tier: 3,  free: false, rewardFa: 'چارم — Skull Charm',                type: 'charm',          icon: '💀' },
-  { tier: 4,  free: false, rewardFa: 'استیکر — شاهین جنگی',               type: 'sticker',        icon: '🦅' },
-  { tier: 5,  free: false, rewardFa: 'بلوپرینت — MCW Dark Omen',          type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 6,  free: false, rewardFa: '۱۰,۰۰۰ XP توکن (دو ساعته)',        type: 'xp_token',       icon: '⭐' },
-  { tier: 7,  free: false, rewardFa: 'آرم — جمجمه بنفش',                  type: 'emblem',         icon: '💜' },
-  { tier: 8,  free: false, rewardFa: 'کارت ویزیت — Shadow Ops',           type: 'calling_card',   icon: '🃏', rarity: 'نادر' },
-  { tier: 9,  free: false, rewardFa: 'استیکر — آتش و خاکستر',             type: 'sticker',        icon: '🔥' },
-  { tier: 10, free: false, rewardFa: 'اسکین کامو — Storm Camo',           type: 'camo',           icon: '🎨', rarity: 'حماسی' },
-
-  // Tier 11-20
-  { tier: 11, free: false, rewardFa: '۵,۰۰۰ XP توکن (یک ساعته)',         type: 'xp_token',       icon: '⭐' },
-  { tier: 12, free: false, rewardFa: 'بلوپرینت — Rival-9 Ice Storm',      type: 'blueprint',      icon: '🔫', rarity: 'حماسی' },
-  { tier: 13, free: false, rewardFa: 'آرم — سرباز طلایی',                  type: 'emblem',         icon: '🏆' },
-  { tier: 14, free: false, rewardFa: 'چارم — شمشیر کوچک',                type: 'charm',          icon: '⚔️' },
-  { tier: 15, free: false, rewardFa: 'استیکر — برق و بازو',               type: 'sticker',        icon: '💪' },
-  { tier: 16, free: false, rewardFa: '۱۰,۰۰۰ XP توکن (دو ساعته)',        type: 'xp_token',       icon: '⭐' },
-  { tier: 17, free: false, rewardFa: 'کارت ویزیت انیمیشن — Night Raid',  type: 'calling_card',   icon: '🎬', rarity: 'حماسی' },
-  { tier: 18, free: false, rewardFa: 'بلوپرینت — Holger 556 Phantom',    type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 19, free: false, rewardFa: 'اسکین خودرو — Tactical Jeep Dark', type: 'vehicle',        icon: '🚙', rarity: 'نادر' },
-  { tier: 20, free: true,  rewardFa: '۲۰۰ CoD Points',                    type: 'cod_points',     icon: '💰' },
-
-  // Tier 21-30
-  { tier: 21, free: false, rewardFa: 'اسکین اپراتور — Makarov Reborn',   type: 'operator_skin',  icon: '🕵️', rarity: 'حماسی' },
-  { tier: 22, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 23, free: false, rewardFa: 'استیکر — هیولای صحرا',              type: 'sticker',        icon: '🦂' },
-  { tier: 24, free: false, rewardFa: 'چارم — قلب قرمز',                  type: 'charm',          icon: '❤️' },
-  { tier: 25, free: false, rewardFa: 'بلوپرینت — SVA 545 Viper',          type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 26, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 27, free: false, rewardFa: 'آرم — ماه خون',                     type: 'emblem',         icon: '🌕' },
-  { tier: 28, free: false, rewardFa: 'کارت ویزیت — War Machine',          type: 'calling_card',   icon: '🃏', rarity: 'نادر' },
-  { tier: 29, free: false, rewardFa: 'اسکین کامو — Midnight Camo',        type: 'camo',           icon: '🎨', rarity: 'افسانه‌ای' },
-  { tier: 30, free: false, rewardFa: 'اسکین خودرو — Armored SUV Midnight',type: 'vehicle',        icon: '🚙', rarity: 'حماسی' },
-
-  // Tier 31-40
-  { tier: 31, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 32, free: false, rewardFa: 'چارم — انگشتر جمجمه',              type: 'charm',          icon: '💍' },
-  { tier: 33, free: false, rewardFa: 'بلوپرینت — KATT AMR Neon',         type: 'blueprint',      icon: '🔫', rarity: 'حماسی' },
-  { tier: 34, free: false, rewardFa: 'استیکر — هواپیما انفجاری',          type: 'sticker',        icon: '✈️' },
-  { tier: 35, free: false, rewardFa: 'آرم — شیر زرین',                    type: 'emblem',         icon: '🦁' },
-  { tier: 36, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 37, free: false, rewardFa: 'کارت ویزیت انیمیشن — Blood Eagle',  type: 'calling_card',   icon: '🎬', rarity: 'افسانه‌ای' },
-  { tier: 38, free: false, rewardFa: 'بلوپرینت — WSP Swarm Inferno',      type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 39, free: false, rewardFa: 'اسکین کامو — Inferno Camo',         type: 'camo',           icon: '🎨', rarity: 'حماسی' },
-  { tier: 40, free: true,  rewardFa: '۲۰۰ CoD Points',                    type: 'cod_points',     icon: '💰' },
-
-  // Tier 41-50
-  { tier: 41, free: false, rewardFa: 'اسکین اپراتور — Price Overlord',    type: 'operator_skin',  icon: '🎖️', rarity: 'افسانه‌ای' },
-  { tier: 42, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 43, free: false, rewardFa: 'استیکر — عقرب آتشین',               type: 'sticker',        icon: '🦂' },
-  { tier: 44, free: false, rewardFa: 'چارم — شمشیر دو دم',               type: 'charm',          icon: '🗡️' },
-  { tier: 45, free: false, rewardFa: 'بلوپرینت — BAS-B Shadow Strike',    type: 'blueprint',      icon: '🔫', rarity: 'حماسی' },
-  { tier: 46, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 47, free: false, rewardFa: 'آرم انیمیشن — Dark Ops',            type: 'emblem',         icon: '🌑', rarity: 'افسانه‌ای' },
-  { tier: 48, free: false, rewardFa: 'کارت ویزیت — Death Dealer',         type: 'calling_card',   icon: '🃏', rarity: 'حماسی' },
-  { tier: 49, free: false, rewardFa: 'اسکین خودرو — Helicopter Stealth', type: 'vehicle',        icon: '🚁', rarity: 'افسانه‌ای' },
-  { tier: 50, free: false, rewardFa: 'بلوپرینت ویژه — MTZ Interceptor Wraith', type: 'blueprint', icon: '🔫', rarity: 'فوق‌العاده' },
-
-  // Tier 51-60
-  { tier: 51, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 52, free: false, rewardFa: 'استیکر — کد امنیتی',                type: 'sticker',        icon: '🔐' },
-  { tier: 53, free: false, rewardFa: 'چارم — سنگ آسمانی',                 type: 'charm',          icon: '🌠' },
-  { tier: 54, free: false, rewardFa: 'بلوپرینت — Pulemyot Raven',         type: 'blueprint',      icon: '🔫', rarity: 'حماسی' },
-  { tier: 55, free: false, rewardFa: 'آرم — راز جنگل',                    type: 'emblem',         icon: '🌲' },
-  { tier: 56, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 57, free: false, rewardFa: 'کارت ویزیت انیمیشن — Orbital Strike', type: 'calling_card',icon: '🎬', rarity: 'افسانه‌ای' },
-  { tier: 58, free: false, rewardFa: 'اسکین کامو — Neon Storm',            type: 'camo',           icon: '🎨', rarity: 'افسانه‌ای' },
-  { tier: 59, free: false, rewardFa: 'اسکین خودرو — ATV Neon Ghost',      type: 'vehicle',        icon: '🏍️', rarity: 'حماسی' },
-  { tier: 60, free: true,  rewardFa: '۲۰۰ CoD Points',                    type: 'cod_points',     icon: '💰' },
-
-  // Tier 61-70
-  { tier: 61, free: false, rewardFa: 'اسکین اپراتور — Soap Dark Tide',    type: 'operator_skin',  icon: '🌊', rarity: 'حماسی' },
-  { tier: 62, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 63, free: false, rewardFa: 'استیکر — تاج خار',                   type: 'sticker',        icon: '👑' },
-  { tier: 64, free: false, rewardFa: 'چارم — قطب‌نمای طلایی',             type: 'charm',          icon: '🧭' },
-  { tier: 65, free: false, rewardFa: 'بلوپرینت — DM56 Ghostwalker',       type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 66, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 67, free: false, rewardFa: 'آرم — شاهین آهنی',                   type: 'emblem',         icon: '🦅' },
-  { tier: 68, free: false, rewardFa: 'کارت ویزیت — Lone Wolf',             type: 'calling_card',   icon: '🐺', rarity: 'نادر' },
-  { tier: 69, free: false, rewardFa: 'اسکین کامو — Gold Serpent',          type: 'camo',           icon: '🐍', rarity: 'فوق‌العاده' },
-  { tier: 70, free: false, rewardFa: 'بلوپرینت ویژه — Holger 556 Warpath', type: 'blueprint',     icon: '🔫', rarity: 'فوق‌العاده' },
-
-  // Tier 71-80
-  { tier: 71, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 72, free: false, rewardFa: 'استیکر — ستاره مرگ',                type: 'sticker',        icon: '💫' },
-  { tier: 73, free: false, rewardFa: 'چارم — دستبند کارما',               type: 'charm',          icon: '☯️' },
-  { tier: 74, free: false, rewardFa: 'بلوپرینت — Lachmann Sub Thunder',   type: 'blueprint',      icon: '🔫', rarity: 'حماسی' },
-  { tier: 75, free: false, rewardFa: 'آرم — مرگ‌آور نقره‌ای',              type: 'emblem',         icon: '💀' },
-  { tier: 76, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 77, free: false, rewardFa: 'کارت ویزیت انیمیشن — Dark Horizon', type: 'calling_card',   icon: '🎬', rarity: 'فوق‌العاده' },
-  { tier: 78, free: false, rewardFa: 'اسکین خودرو — Warzone Armored',     type: 'vehicle',        icon: '🚗', rarity: 'افسانه‌ای' },
-  { tier: 79, free: false, rewardFa: 'اسکین اپراتور — Alex Phantom',      type: 'operator_skin',  icon: '🥷', rarity: 'افسانه‌ای' },
-  { tier: 80, free: true,  rewardFa: '۴۰۰ CoD Points',                    type: 'cod_points',     icon: '💰' },
-
-  // Tier 81-90
-  { tier: 81, free: false, rewardFa: '۵,۰۰۰ XP توکن',                    type: 'xp_token',       icon: '⭐' },
-  { tier: 82, free: false, rewardFa: 'استیکر — اژدهای آتش',               type: 'sticker',        icon: '🐉' },
-  { tier: 83, free: false, rewardFa: 'چارم — فانوس آهنین',                type: 'charm',          icon: '🏮' },
-  { tier: 84, free: false, rewardFa: 'بلوپرینت — MCPR Oblivion',          type: 'blueprint',      icon: '🔫', rarity: 'افسانه‌ای' },
-  { tier: 85, free: false, rewardFa: 'آرم — آتش جاودان',                  type: 'emblem',         icon: '🔥' },
-  { tier: 86, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 87, free: false, rewardFa: 'کارت ویزیت — Blood Contract',       type: 'calling_card',   icon: '🃏', rarity: 'افسانه‌ای' },
-  { tier: 88, free: false, rewardFa: 'اسکین کامو — Obsidian Camo',        type: 'camo',           icon: '🎨', rarity: 'فوق‌العاده' },
-  { tier: 89, free: false, rewardFa: 'بلوپرینت ویژه — WSP Swarm Eclipse', type: 'blueprint',      icon: '🔫', rarity: 'فوق‌العاده' },
-  { tier: 90, free: false, rewardFa: 'اسکین اپراتور — Ghost Reaper',      type: 'operator_skin',  icon: '💀', rarity: 'فوق‌العاده' },
-
-  // Tier 91-100
-  { tier: 91, free: false, rewardFa: '۱۰,۰۰۰ XP توکن',                   type: 'xp_token',       icon: '⭐' },
-  { tier: 92, free: false, rewardFa: 'استیکر — انفجار هسته‌ای',           type: 'sticker',        icon: '☢️' },
-  { tier: 93, free: false, rewardFa: 'چارم — جمجمه الماسی',               type: 'charm',          icon: '💎' },
-  { tier: 94, free: false, rewardFa: 'بلوپرینت — TAQ Eradicator Eternity',type: 'blueprint',      icon: '🔫', rarity: 'فوق‌العاده' },
-  { tier: 95, free: false, rewardFa: 'آرم انیمیشن — نمادِ اسرار',         type: 'emblem',         icon: '🌀', rarity: 'افسانه‌ای' },
-  { tier: 96, free: false, rewardFa: '۲۰,۰۰۰ XP توکن (چهار ساعته)',      type: 'xp_token',       icon: '⭐' },
-  { tier: 97, free: false, rewardFa: 'کارت ویزیت انیمیشن — Apocalypse',   type: 'calling_card',   icon: '🎬', rarity: 'فوق‌العاده' },
-  { tier: 98, free: false, rewardFa: 'اسکین خودرو — Final Judgment ATV',  type: 'vehicle',        icon: '🏍️', rarity: 'فوق‌العاده' },
-  { tier: 99, free: false, rewardFa: 'اسکین کامو — Mastery Ultra',         type: 'camo',           icon: '🎨', rarity: 'فوق‌العاده' },
-  { tier: 100,free: true,  rewardFa: 'اسکین اپراتور افسانه‌ای — The Harbinger', type: 'operator_skin', icon: '⚡', rarity: 'فوق‌العاده' },
+export const battlePassSectors: BattlePassSector[] = [
+  {
+    id: 'bp-blackcell',
+    sector: 'blackcell',
+    label: 'BLACKCELL SECTOR',
+    labelFa: 'بخش اختصاصی BlackCell',
+    operator: {
+      name: 'Reckoner',
+      nameFa: 'اپراتور Reckoner (KorTac)',
+      kind: 'operator_skin',
+      detailFa: 'نقاب روح‌مانند که گاه حضور شبح‌وار درونش نمایان می‌شود؛ حالت متحرک با الکتریسیته.',
+    },
+    rewards: [
+      { name: '1,100 COD Points', nameFa: '۱٬۱۰۰ CoD Point', kind: 'cod_points' },
+      {
+        name: 'Long Live the King',
+        nameFa: 'بلوپرینت SMG «Long Live the King»',
+        kind: 'blueprint',
+        detailFa: ' نیزه، شمشیر و چکش دور لوله با Inquisitor Tracers و دود مرموز.',
+      },
+      {
+        name: 'Malleus',
+        nameFa: 'بلوپرینت Sledgehammer «Malleus»',
+        kind: 'blueprint',
+        detailFa: 'گلیف‌ها روی دسته سرازیر می‌شوند؛ افکت Inquisitor Impact.',
+      },
+      { name: 'Judge, Jury, and Finisher', nameFa: 'Finishing Move «Judge, Jury, and Finisher»', kind: 'finishing_move' },
+    ],
+    noteFa:
+      'با خرید BlackCell وارد این Sector می‌شوید. ۷ بلوپرینت و ۱۱ اسکین اپراتور BlackCell در طول نقشهٔ پاس پراکنده‌اند و ۲۰ Tier Skip همراه بسته است.',
+  },
+  {
+    id: 'bp-instant',
+    sector: 'instant',
+    label: 'INSTANT SECTOR',
+    labelFa: 'بخش آنی (با خرید پاس)',
+    operator: {
+      name: 'Valeria — Roving Adventure',
+      nameFa: 'اسکین «Roving Adventure» برای Valeria (SpecGru)',
+      kind: 'operator_skin',
+      blackCell: 'Valeria BlackCell — زره متحرک سیاه‌وزرد با چهرهٔ جمجمه‌ای',
+      detailFa: 'بارونس کارتل Las Almas با یادگاری‌های خطرناک روی بدن.',
+    },
+    rewards: [
+      {
+        name: 'Mami (Rhea Ripley)',
+        nameFa: 'اپراتور Mami — Rhea Ripley (KorTac)',
+        kind: 'operator_skin',
+        blackCell: 'Mami BlackCell — جلیقهٔ چرمی طرح‌دار روی بادی زرد',
+        detailFa: 'مدل آرایش گوتیک، جلیقهٔ چرمی میخ‌دار و بوت‌های بلند.',
+      },
+      {
+        name: 'Prismtrap',
+        nameFa: 'بلوپرینت FJX Horus «Prismtrap»',
+        kind: 'blueprint',
+        detailFa: 'بدنهٔ بنفش‌وزر با پرهای فلزی؛ همراه قطعهٔ JAK Scimitar Kit.',
+      },
+      { name: 'Riptide', nameFa: 'Finishing Move «Riptide»', kind: 'finishing_move' },
+      { name: '10% Battle Pass Boost', nameFa: '۱۰٪ بوست XP پاس نبرد', kind: 'boost' },
+    ],
+  },
+  {
+    id: 'bp-s1',
+    sector: 1,
+    label: 'SECTOR 01',
+    labelFa: 'بخش ۱',
+    operator: {
+      name: 'Bantam — Night’s End',
+      nameFa: 'اسکین «Night’s End» برای Bantam',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: ماسک خاموش‌شده با جرقه و دود',
+      detailFa: 'ماسک فلزی صیقلی با تزئینات مارپیچ روی بازوهای خالکوبی.',
+    },
+    rewards: [
+      {
+        name: 'Flamma (TYR Handgun)',
+        nameFa: 'بلوپرینت TYR «Flamma»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal — فلز سرخ با نقش‌ونگار آبی، مشکی و نقره‌ای.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s2',
+    sector: 2,
+    label: 'SECTOR 02',
+    labelFa: 'بخش ۲',
+    rewards: [
+      {
+        name: 'Laquearius (SVA 545)',
+        nameFa: 'بلوپرینت SVA 545 «Laquearius»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با Inquisitor Tracers و Death Effect «Divine Enforcement»',
+        detailFa: 'تم SPQR — برنج و نوشتهٔ لاتینی؛ Muzzle Break سنگین، لولهٔ دقتی و آپتیک ۲.۵x.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s3',
+    sector: 3,
+    label: 'SECTOR 03',
+    labelFa: 'بخش ۳',
+    rewards: [
+      {
+        name: 'Carpophorus (Reclaimer 18)',
+        nameFa: 'بلوپرینت Reclaimer 18 «Carpophorus»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با Inquisitor Tracers و «Divine Enforcement»',
+        detailFa: 'تم Paintball — لکه‌های رنگ؛ برد آسیب و ADS بهتر، مهمات لولهٔ بیشتر، Reload کندتر، بدون قنداق.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s4',
+    sector: 4,
+    label: 'SECTOR 04',
+    labelFa: 'بخش ۴',
+    operator: {
+      name: 'Byline — Luchadora',
+      nameFa: 'اسکین «Luchadora» برای Byline',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: ماسک شبح‌دار و تجهیزات مشکی-زرد',
+      detailFa: 'ماسک با لهیب قرمز روی لباس قرمز-زرد مسابقهٔ قهرمانی.',
+    },
+    rewards: [
+      { name: 'Crixus (DG-58 LSW)', nameFa: 'بلوپرینت DG-58 LSW «Crixus»', kind: 'blueprint', detailFa: 'تم SPQR.' },
+    ],
+  },
+  {
+    id: 'bp-s5',
+    sector: 5,
+    label: 'SECTOR 05',
+    labelFa: 'بخش ۵',
+    operator: {
+      name: 'Enigma — Trophy King',
+      nameFa: 'اسکین «Trophy King» برای Enigma',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: کملافل با جرقه و گلوله‌های رنگی روی نوار مهمات',
+      detailFa: 'مهمات اضافی روی یونیفرم استتاب گرمسیری.',
+    },
+    rewards: [],
+  },
+  {
+    id: 'bp-s6',
+    sector: 6,
+    label: 'SECTOR 06 · HVT',
+    labelFa: 'بخش ۶ — سلاح جدید',
+    rewards: [
+      {
+        name: 'Static-HV',
+        nameFa: 'سلاح پایهٔ Static-HV (SMG)',
+        kind: 'weapon',
+        detailFa: 'کالیبر 5.7x28mm، ماگزین پایهٔ ۵۰ تیر، ۱۸ سطح پیشرفت؛ بلوپرینت پاس آن در Sector 17 است.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s7',
+    sector: 7,
+    label: 'SECTOR 07 · HVT',
+    labelFa: 'بخش ۷ — سلاح جدید',
+    rewards: [
+      {
+        name: 'STG44',
+        nameFa: 'سلاح پایهٔ STG44 (Assault Rifle)',
+        kind: 'weapon',
+        detailFa: 'تمام‌اتوماتیک با کالیبر 7.92x33mm، ۲۱ سطح پیشرفت، الگوی ریکویل امضا‌دار؛ بلوپرینت پاس در Sector 19.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s8',
+    sector: 8,
+    label: 'SECTOR 08',
+    labelFa: 'بخش ۸',
+    rewards: [
+      {
+        name: 'Attilius (Soulrender)',
+        nameFa: 'بلوپرینت Soulrender «Attilius»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با گلیف‌های متحرک و مه پراکنده',
+        detailFa: 'تم SPQR — تیغهٔ آیینی با برش‌های سریع.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s9',
+    sector: 9,
+    label: 'SECTOR 09',
+    labelFa: 'بخش ۹',
+    rewards: [
+      {
+        name: 'Bestiarius (RAM-7)',
+        nameFa: 'بلوپرینت RAM-7 «Bestiarius»',
+        kind: 'blueprint',
+        detailFa: 'تم Paintball.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s10',
+    sector: 10,
+    label: 'SECTOR 10',
+    labelFa: 'بخش ۱۰',
+    operator: {
+      name: 'Price — Homecoming',
+      nameFa: 'اسکین «Homecoming» برای Price',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: دستکش‌های متحرک با جرقه',
+      detailFa: 'کاپیتان Price با یونیفرم نظامی و پرچم Union Jack روی سینه و پشت.',
+    },
+    rewards: [
+      {
+        name: 'Provocator (Bolt-Action MR)',
+        nameFa: 'بلوپرینت Bolt-Action Marksman «Provocator»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s11',
+    sector: 11,
+    label: 'SECTOR 11',
+    labelFa: 'بخش ۱۱',
+    operator: {
+      name: 'Hammer — Knight’s Resolve',
+      nameFa: 'اسکین «Knight’s Resolve» برای Hammer',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: دید در شب سوسوزن و طاقهٔ رنگ‌پریده',
+      detailFa: 'عینک دید در شب پیشرفته، کت قرمز ضخیم و تاج پر سبک شوالیه‌ها.',
+    },
+    rewards: [
+      { name: 'Thraex (Renetti)', nameFa: 'بلوپرینت Renetti «Thraex»', kind: 'blueprint', detailFa: 'تم Paintball.' },
+    ],
+  },
+  {
+    id: 'bp-s12',
+    sector: 12,
+    label: 'SECTOR 12',
+    labelFa: 'بخش ۱۲',
+    rewards: [
+      {
+        name: 'Parmularius (Lockwood 680)',
+        nameFa: 'بلوپرینت Lockwood 680 «Parmularius»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s13',
+    sector: 13,
+    label: 'SECTOR 13',
+    labelFa: 'بخش ۱۳',
+    rewards: [
+      {
+        name: 'Unyielding Forge (Sledgehammer)',
+        nameFa: 'بلوپرینت Sledgehammer «Unyielding Forge»',
+        kind: 'blueprint',
+        detailFa: 'تم SPQR — ضربهٔ نزدیک سنگین.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s14',
+    sector: 14,
+    label: 'SECTOR 14',
+    labelFa: 'بخش ۱۴',
+    rewards: [
+      {
+        name: 'Benign Hero (WSP Stinger)',
+        nameFa: 'بلوپرینت WSP Stinger «Benign Hero»',
+        kind: 'blueprint',
+        detailFa: 'تم Paintball.',
+      },
+      {
+        name: 'Gladius Graecus (BAS-B)',
+        nameFa: 'بلوپرینت BAS-B «Gladius Graecus»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با Inquisitor Tracers و «Divine Enforcement»',
+        detailFa: 'Flash Hider برای پینگ کوتاه‌تر روی رادار، جبران‌کنندهٔ ریکویل و ماگزین ۳۰ تیر.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s15',
+    sector: 15,
+    label: 'SECTOR 15',
+    labelFa: 'بخش ۱۵',
+    rewards: [
+      {
+        name: 'Castus (KATT-AMR)',
+        nameFa: 'بلوپرینت KATT-AMR «Castus»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با Inquisitor Tracers و «Divine Enforcement»',
+        detailFa: 'آپتیک متغیر 3.7x و 7.0x، ساپرسور، مهمات پرسرعت و ADS بهبودیافته.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s16',
+    sector: 16,
+    label: 'SECTOR 16',
+    labelFa: 'بخش ۱۶',
+    operator: {
+      name: 'Ivan',
+      nameFa: 'اسکین Ivan (KorTac)',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell «Boss’ Favorite»',
+      detailFa: 'لباس زمستانی Konni با لوگوی گروه و ابزار نجات.',
+    },
+    rewards: [
+      {
+        name: 'Merciful Downfall (Striker)',
+        nameFa: 'بلوپرینت Striker «Merciful Downfall»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s17',
+    sector: 17,
+    label: 'SECTOR 17',
+    labelFa: 'بخش ۱۷',
+    rewards: [
+      {
+        name: 'Sculpted Aptitude (Static-HV)',
+        nameFa: 'بلوپرینت Static-HV «Sculpted Aptitude»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell: JAK Glassless Optic، لولهٔ ساپرسور یکپارچه، ADS و Sprint-to-Fire سریع‌تر',
+        detailFa: 'تم Paintball — بر پایهٔ سلاح جدید سیزن.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s18',
+    sector: 18,
+    label: 'SECTOR 18',
+    labelFa: 'بخش ۱۸',
+    operator: {
+      name: 'Jet — Samurai’s Camo',
+      nameFa: 'اسکین «Samurai’s Camo» برای Jet',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: زره سامورایی مشکی با نخ‌های زرد و نقاب طلایی',
+      detailFa: 'زرهٔ نقره‌ای و مشکی با لهیر نارنجی و نقاب دندان‌نما.',
+    },
+    rewards: [
+      {
+        name: 'Luminous Dread (KV Inhibitor)',
+        nameFa: 'بلوپرینت KV Inhibitor «Luminous Dread»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s19',
+    sector: 19,
+    label: 'SECTOR 19',
+    labelFa: 'بخش ۱۹',
+    rewards: [
+      {
+        name: 'Dimachaerus (STG44)',
+        nameFa: 'بلوپرینت STG44 «Dimachaerus»',
+        kind: 'blueprint',
+        blackCell: 'نسخهٔ BlackCell با Inquisitor Tracers و «Divine Enforcement»',
+        detailFa: 'تم SPQR — درامگ ۶۰ تیر، لولهٔ بلند و گریپ سنگین برای آتش پایدار.',
+      },
+    ],
+  },
+  {
+    id: 'bp-s20',
+    sector: 20,
+    label: 'SECTOR 20',
+    labelFa: 'بخش ۲۰',
+    rewards: [
+      {
+        name: 'Grand Assailant (XRK Stalker)',
+        nameFa: 'بلوپرینت XRK Stalker «Grand Assailant»',
+        kind: 'blueprint',
+        detailFa: 'تم Red Metal — پایانهٔ مسیر ۲۰ بخش.',
+      },
+    ],
+  },
+  {
+    id: 'bp-completion',
+    sector: 'completion',
+    label: 'COMPLETION SECTOR',
+    labelFa: 'بخش تکمیل (۱۰۰٪ نقشه)',
+    operator: {
+      name: 'Mami — Eradicator',
+      nameFa: 'اسکین «Eradicator» برای Mami',
+      kind: 'operator_skin',
+      blackCell: 'نسخهٔ BlackCell: حروف RR روی پشت جلیقه',
+      detailFa: 'میخ، زنجیر و استادی روی جلیقهٔ گوتیک.',
+    },
+    rewards: [
+      { name: '300 COD Points', nameFa: '۳۰۰ CoD Point', kind: 'cod_points' },
+      { name: 'Praetor (MCW)', nameFa: 'بلوپرینت MCW «Praetor»', kind: 'blueprint', detailFa: 'تم SPQR.' },
+      { name: 'Powerbomb!', nameFa: 'Finishing Move «Powerbomb!»', kind: 'finishing_move' },
+      {
+        name: 'Valeria — Death’s Medallion',
+        nameFa: 'اسکین «Death’s Medallion» برای Valeria',
+        kind: 'operator_skin',
+        blackCell: 'نسخهٔ BlackCell: گیتار جرقه‌زن و انیمیشن شبح‌وار',
+        detailFa: 'قرمز و مشکی با گل رز روی گوش، چشمان سرخ پشت نقاب جمجمه و گلبرگ‌های در حال ریزش.',
+      },
+    ],
+    noteFa: 'با فتح همهٔ Sectorها و رسیدن به ۱۰۰٪ نقشهٔ پاس آزاد می‌شود.',
+  },
 ]

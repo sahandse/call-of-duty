@@ -1,158 +1,159 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { mapsData } from '../data/mapsData'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
 type GameFilter = 'all' | 'warzone' | 'mw3'
 type SizeFilter = 'all' | 'کوچک' | 'متوسط' | 'بزرگ' | 'عظیم'
+
+const SIZES: SizeFilter[] = ['all', 'کوچک', 'متوسط', 'بزرگ', 'عظیم']
 
 export default function MapsSection() {
   const [gameFilter, setGameFilter] = useState<GameFilter>('all')
   const [sizeFilter, setSizeFilter] = useState<SizeFilter>('all')
   const [expandedMap, setExpandedMap] = useState<string | null>(null)
 
-  const filtered = useMemo(() => {
-    return mapsData.filter(m => {
-      if (gameFilter !== 'all' && m.game !== gameFilter) return false
-      if (sizeFilter !== 'all' && m.size !== sizeFilter) return false
-      return true
-    })
-  }, [gameFilter, sizeFilter])
+  const filtered = useMemo(
+    () =>
+      mapsData.filter((m) => {
+        if (gameFilter !== 'all' && m.game !== gameFilter) return false
+        if (sizeFilter !== 'all' && m.size !== sizeFilter) return false
+        return true
+      }),
+    [gameFilter, sizeFilter],
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg flex items-center gap-2">
-          🗺️ نقشه‌ها
-        </h2>
-        <p className="text-gray-500 text-xs mt-0.5">
-          اطلاعات، نکات و راهنمای {mapsData.length} نقشه Warzone و MW3
-        </p>
+    <div className="space-y-5">
+      <SectionHeader
+        tab="maps"
+        en="MAP BRIEFINGS"
+        title="نقشه‌ها"
+        note="فهرست بر پایهٔ نقشه‌های ذکرشده در یادداشت‌های رسمی سیزن ۵ و ریلُود آن (ژوئیه–سپتامبر ۲۰۲۴). برچسب ARCHIVE یعنی نقشه در آن بازه در روتیشن بوده اما جزئیات آن از منابع رسمی این سیزن نیامده است."
+        stats={[
+          { label: 'MAPS', value: mapsData.length },
+          { label: 'WARZONE', value: mapsData.filter((m) => m.game === 'warzone').length },
+          { label: 'S05 NEW', value: mapsData.filter((m) => m.addedIn.startsWith('SEASON 05')).length },
+        ]}
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
+        {(
+          [
+            { id: 'all', label: 'همه' },
+            { id: 'warzone', label: 'WARZONE' },
+            { id: 'mw3', label: 'MULTIPLAYER' },
+          ] as { id: GameFilter; label: string }[]
+        ).map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setGameFilter(f.id)}
+            aria-pressed={gameFilter === f.id}
+            className={`hud-tag border px-3 py-1.5 transition-colors ${
+              gameFilter === f.id
+                ? 'border-cod-gold bg-cod-gold text-black'
+                : 'border-cod-border bg-cod-card text-gray-400 hover:border-cod-gold/50 hover:text-white'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+
+        <span className="mx-1 h-4 w-px bg-cod-border" aria-hidden />
+
+        <span className="hud-tag text-gray-500">SIZE</span>
+        {SIZES.map((s) => (
+          <button
+            key={s}
+            onClick={() => setSizeFilter(s)}
+            aria-pressed={sizeFilter === s}
+            className={`px-2.5 py-1.5 text-[11.5px] border transition-colors ${
+              sizeFilter === s
+                ? 'border-cod-gold/60 bg-cod-gold/15 text-cod-gold-light'
+                : 'border-cod-border bg-cod-card text-gray-400 hover:text-white'
+            }`}
+          >
+            {s === 'all' ? 'همه' : s}
+          </button>
+        ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex gap-2">
-          {([
-            { id: 'all', label: 'همه بازی‌ها' },
-            { id: 'warzone', label: '🗺️ وارزون' },
-            { id: 'mw3', label: '🎮 MW3' },
-          ] as { id: GameFilter; label: string }[]).map(f => (
-            <button
-              key={f.id}
-              onClick={() => setGameFilter(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
-                gameFilter === f.id
-                  ? 'bg-cod-gold text-black border-cod-gold'
-                  : 'bg-cod-card border-cod-border text-gray-400 hover:border-cod-gold/40 hover:text-white'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="w-px h-5 bg-cod-border hidden sm:block" />
-
-        <div className="flex gap-2 flex-wrap">
-          <span className="text-gray-500 text-xs self-center">اندازه:</span>
-          {(['all', 'کوچک', 'متوسط', 'بزرگ', 'عظیم'] as SizeFilter[]).map(s => (
-            <button
-              key={s}
-              onClick={() => setSizeFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
-                sizeFilter === s
-                  ? 'bg-cod-gold text-black border-cod-gold'
-                  : 'bg-cod-card border-cod-border text-gray-400 hover:border-cod-gold/40 hover:text-white'
-              }`}
-            >
-              {s === 'all' ? 'همه' : s}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <p className="text-gray-500 text-xs">{filtered.length} نقشه نمایش داده می‌شود</p>
-
-      {/* Map Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map(map => {
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {filtered.map((map) => {
           const isExpanded = expandedMap === map.id
           return (
-            <div
+            <article
               key={map.id}
-              className="border border-cod-border rounded-xl overflow-hidden transition-all hover:border-cod-gold/30"
+              className="notch overflow-hidden border border-cod-border bg-cod-card transition-colors hover:border-cod-gold/40"
             >
-              {/* Card Header / Banner */}
-              <div className={`relative bg-gradient-to-bl ${map.gradient} p-5 border-b border-cod-border`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-3xl">{map.icon}</span>
-                    </div>
-                    <h3 className="text-white font-black text-xl">{map.name}</h3>
-                    <p className="text-gray-300 text-sm">{map.nameFa}</p>
+              <div className={`border-b border-cod-border bg-gradient-to-bl ${map.accent} p-4`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="hud-tag mb-1 text-cod-gold-light">{map.code}</p>
+                    <h3 className="font-display text-lg font-semibold uppercase tracking-wider text-white">
+                      {map.name}
+                    </h3>
+                    <p className="text-xs text-gray-300">{map.nameFa}</p>
                   </div>
-                  <div className="flex flex-col gap-1.5 items-end">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      map.game === 'warzone'
-                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-                        : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                    }`}>
-                      {map.game === 'warzone' ? 'وارزون' : 'MW3'}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="hud-tag border border-cod-border bg-cod-bg/70 px-1.5 py-0.5 text-[9px] text-gray-300">
+                      {map.game === 'warzone' ? 'WARZONE' : 'MP'}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-cod-card/60 text-gray-300 border border-cod-border">
-                      {map.typeFa}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      map.size === 'عظیم' ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                      : map.size === 'بزرگ' ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-                      : map.size === 'متوسط' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                      : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                    }`}>
-                      {map.size}
-                    </span>
+                    <span className="hud-tag px-1 text-[9px] text-cod-sand">{map.size}</span>
+                    <span className="hud-tag px-1 text-[9px] text-gray-500">{map.addedIn}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Card Body */}
-              <div className="bg-cod-card p-4 space-y-3">
-                <p className="text-gray-300 text-sm leading-relaxed">{map.description}</p>
-
-                <button
-                  onClick={() => setExpandedMap(isExpanded ? null : map.id)}
-                  className="flex items-center gap-2 text-cod-gold text-xs hover:underline"
-                >
-                  <span>{isExpanded ? '▲ پنهان کردن' : '▼ نمایش نکات'}</span>
-                  <span className="text-gray-500">({map.tips.length} نکته)</span>
-                </button>
+              <div className="space-y-3 p-4">
+                <p className="text-[13px] leading-relaxed text-gray-300">{map.description}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="hud-tag text-gray-500">{map.typeFa}</span>
+                  <span
+                    className={`hud-tag text-[9px] ${
+                      map.provenance === 'official' ? 'text-cod-gold' : 'text-cod-steel'
+                    }`}
+                  >
+                    {map.provenance === 'official' ? 'IN S05 NOTES' : 'ARCHIVE'}
+                  </span>
+                  <button
+                    onClick={() => setExpandedMap(isExpanded ? null : map.id)}
+                    aria-expanded={isExpanded}
+                    className="mr-auto hud-tag text-cod-gold-light hover:underline"
+                  >
+                    {isExpanded ? 'پنهان کردن نکات' : `نکات · ${map.tips.length}`}
+                  </button>
+                </div>
 
                 {isExpanded && (
-                  <div className="space-y-2 pt-1">
-                    <p className="text-gray-400 text-xs font-medium">💡 نکات بازی:</p>
-                    <ul className="space-y-1.5">
-                      {map.tips.map((tip, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                          <span className="text-cod-gold flex-shrink-0">•</span>
-                          <span className="leading-relaxed">{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <ul className="space-y-2 border-t border-cod-border pt-3">
+                    {map.tips.map((tip, i) => (
+                      <li key={i} className="flex gap-2.5 text-[12.5px] leading-relaxed text-gray-300">
+                        <span className="hud-num mt-0.5 shrink-0 text-cod-gold/70">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
-            </div>
+            </article>
           )
         })}
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">🗺️</div>
-          <p>نقشه‌ای با این فیلترها یافت نشد</p>
+        <div className="notch bg-cod-card px-4 py-10 text-center">
+          <p className="hud-tag text-gray-500">NO MAPS MATCH THIS FILTER</p>
         </div>
       )}
+
+      <SourceNote kind="archive">
+        چیدمان، نام POI و نکته‌های تاکتیکی بازتاب وضعیت بازی در پایان سیزن ۵ (سپتامبر ۲۰۲۴) است. روتیشن نقشه‌ها،
+        لوت و ساختار هر نقشه پس از آن عوض شده — این برگه برای یادگیری تاریخچه و سبک بازی است، نه اطلاعات لحظه‌ای.
+      </SourceNote>
     </div>
   )
 }

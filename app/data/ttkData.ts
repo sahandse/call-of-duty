@@ -1,49 +1,82 @@
-export interface TTKWeapon {
-  id: string
-  name: string
-  class: string
-  classFa: string
-  game: 'warzone' | 'mw3' | 'both'
-  bodyDamage: number
-  headMultiplier: number
-  limbMultiplier: number
-  rpm: number
-  magSize: number
-}
-
-export const ttkWeapons: TTKWeapon[] = [
-  { id: 'mcw',            name: 'MCW',            class: 'assault_rifle', classFa: 'رایفل اسالت',   game: 'both',    bodyDamage: 34,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 677,  magSize: 30 },
-  { id: 'sva-545',        name: 'SVA 545',        class: 'assault_rifle', classFa: 'رایفل اسالت',   game: 'both',    bodyDamage: 33,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 720,  magSize: 30 },
-  { id: 'holger-556',     name: 'Holger 556',     class: 'assault_rifle', classFa: 'رایفل اسالت',   game: 'both',    bodyDamage: 36,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 660,  magSize: 30 },
-  { id: 'ram-7',          name: 'RAM-7',          class: 'assault_rifle', classFa: 'رایفل اسالت',   game: 'both',    bodyDamage: 31,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 780,  magSize: 30 },
-  { id: 'bas-b',          name: 'BAS-B',          class: 'battle_rifle',  classFa: 'رایفل نبرد',    game: 'both',    bodyDamage: 51,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 400,  magSize: 20 },
-  { id: 'wsp-swarm',      name: 'WSP Swarm',      class: 'smg',           classFa: 'زیرماشین‌تفنگ', game: 'both',    bodyDamage: 23,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 960,  magSize: 50 },
-  { id: 'rival-9',        name: 'Rival-9',        class: 'smg',           classFa: 'زیرماشین‌تفنگ', game: 'both',    bodyDamage: 25,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 857,  magSize: 40 },
-  { id: 'ram-9',          name: 'RAM-9',          class: 'smg',           classFa: 'زیرماشین‌تفنگ', game: 'both',    bodyDamage: 24,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 900,  magSize: 30 },
-  { id: 'striker-9',      name: 'Striker 9',      class: 'smg',           classFa: 'زیرماشین‌تفنگ', game: 'both',    bodyDamage: 22,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 1000, magSize: 32 },
-  { id: 'mtz-interceptor',name: 'MTZ Interceptor',class: 'sniper',        classFa: 'تک‌تیرانداز',   game: 'both',    bodyDamage: 113, headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 43,   magSize: 5  },
-  { id: 'kv-inhibitor',   name: 'KV Inhibitor',   class: 'sniper',        classFa: 'تک‌تیرانداز',   game: 'both',    bodyDamage: 105, headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 50,   magSize: 5  },
-  { id: 'bruen-mk9',      name: 'Bruen Mk9',      class: 'lmg',           classFa: 'مسلسل سبک',     game: 'both',    bodyDamage: 38,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 576,  magSize: 75 },
-  { id: 'pulemyot-762',   name: 'Pulemyot 762',   class: 'lmg',           classFa: 'مسلسل سبک',     game: 'both',    bodyDamage: 42,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 540,  magSize: 75 },
-  { id: 'dg-58-lsw',      name: 'DG-58 LSW',      class: 'marksman',      classFa: 'تفنگ نشانه‌گیر',game: 'both',    bodyDamage: 45,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 480,  magSize: 30 },
-  { id: 'longbow',        name: 'Longbow',        class: 'marksman',      classFa: 'تفنگ نشانه‌گیر',game: 'both',    bodyDamage: 52,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 240,  magSize: 10 },
-  { id: 'lockwood-680',   name: 'Lockwood 680',   class: 'shotgun',       classFa: 'شاتگان',         game: 'both',    bodyDamage: 280, headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 55,   magSize: 6  },
-  { id: 'renetti',        name: 'Renetti',        class: 'handgun',       classFa: 'تپانچه',         game: 'both',    bodyDamage: 28,  headMultiplier: 1.5, limbMultiplier: 0.8, rpm: 750,  magSize: 15 },
-]
+import { GameMode, PatchTag } from '../types'
 
 export const HP_PRESETS = [
-  { label: 'وارزون — ۲ آرمور (۲۵۰ HP)', value: 250, game: 'warzone' },
-  { label: 'وارزون — ۱ آرمور (۱۷۵ HP)', value: 175, game: 'warzone' },
-  { label: 'وارزون — بدون آرمور (۱۰۰ HP)', value: 100, game: 'warzone' },
-  { label: 'MW3 مولتی‌پلیر (۱۰۰ HP)', value: 100, game: 'mw3' },
+  { label: 'وارزون — ۱۵۰ پلاک (۱۵۰ HP)', value: 150 },
+  { label: 'وارزون — ۷۵ پلاک (۷۵ HP)', value: 75 },
+  { label: 'وارزون — بدون زره (۰ HP)', value: 0 },
+  { label: 'MW3 مولتی‌پلیر (۱۰۰ HP)', value: 100 },
 ]
 
+// فرمول ساده‌شده: شات‌های لازم = (HP + پلاک) ÷ آسیب تنه، رو به بالا.
+// TTK = (شات‌های لازم − ۱) ÷ (rpm ÷ ۶۰۰۰۰) — شات آخر زمانِ بین‌شات‌ها را مصرف نمی‌کند.
 export function calcSTK(hp: number, damage: number) {
-  return Math.ceil(hp / damage)
+  if (damage <= 0) return 0
+  return Math.max(1, Math.ceil(hp / damage))
 }
 
 export function calcTTK(hp: number, damage: number, rpm: number) {
   const stk = calcSTK(hp, damage)
-  if (stk <= 1) return 0
+  if (stk <= 1 || rpm <= 0) return 0
   return Math.round((stk - 1) * (60000 / rpm))
+}
+
+export interface OfficialStat {
+  id: string
+  weapon: string
+  game: GameMode
+  patch: PatchTag
+  metricFa: string
+  value: string
+  contextFa: string
+}
+
+// هر عدد اینجا مستقیماً از جدول «Weapon Adjustments» یادداشت‌های رسمی سیزن ۵ و
+// سیزن ۵ ریلُود استخراج شده است. Activision هیچ‌وقت جدول کامل آسیب MW3 را
+// منتشر نکرد، پس این فهرست «مطلق‌های رسمی» است، نه یک دیتابیس کامل سلاح.
+export const officialStats: OfficialStat[] = [
+  { id: 'stg44-dmg', weapon: 'STG44', game: 'warzone', patch: 'S5R', metricFa: 'حداکثر آسیب', value: '36 → 32', contextFa: 'تنها عدد مطلقِ آسیبی که برای این سلاح منتشر شد؛ روی همه فاصله‌ها اعمال می‌شود.' },
+  { id: 'stg44-dmg-mw3', weapon: 'STG44', game: 'mw3', patch: 'S5R', metricFa: 'حداکثر آسیب', value: 'دست‌نخورده', contextFa: 'در یادداشت‌ها آمده که نرَف فقط به وارزون اعمال شد.' },
+  { id: 'shv-mid', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'آسیب میانی', value: '25 → 24', contextFa: 'همراه با کاهش برد؛ TTK نزدیک‌بردش را از حالت بی‌رقیب خارج کرد.' },
+  { id: 'shv-max-range', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '16.0m → 13.97m', contextFa: 'تقریباً ۲ متر.' },
+  { id: 'shv-nearmid-range', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'برد near-mid', value: '30.48m → 25.4m', contextFa: 'مهم‌ترین نرَف: ۵ متر از برد مفید کم شد.' },
+  { id: 'shv-mid-range', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'برد میانی', value: '40.64m → 35.56m', contextFa: '' },
+  { id: 'shv-head', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'ضریب هدشات', value: '1.4x → 1.2x', contextFa: 'با این ضریب، هدشات دیگر کشنده‌ی آنی نیست.' },
+  { id: 'shv-leg', weapon: 'Static-HV', game: 'warzone', patch: 'S5R', metricFa: 'ضریب پا و کفش', value: '1x → 0.95x', contextFa: '' },
+  { id: 'pulemyot-rpm', weapon: 'Pulemyot 762', game: 'both', patch: 'S5R', metricFa: 'نرخ آتش', value: '492rpm → 545rpm', contextFa: '+۱۱٪ — بزرگ‌ترین بفر LMG سیزن.' },
+  { id: 'pulemyot-ads', weapon: 'Pulemyot 762', game: 'both', patch: 'S5R', metricFa: 'زمان ADS', value: '450ms → 420ms', contextFa: '' },
+  { id: 'pulemyot-stf', weapon: 'Pulemyot 762', game: 'both', patch: 'S5R', metricFa: 'Sprint-to-fire', value: '285ms → 262ms', contextFa: '' },
+  { id: 'pulemyot-neck', weapon: 'Pulemyot 762', game: 'both', patch: 'S5R', metricFa: 'ضریب گردن', value: '1.1x → 1.2x', contextFa: '' },
+  { id: 'mcw68-rpm', weapon: 'MCW 6.8', game: 'both', patch: 'S5R', metricFa: 'نرخ آتش', value: '316rpm → 353rpm', contextFa: '+۱۲٪ به‌همراه ضریب تنه پایین ۱x → ۱.۲x.' },
+  { id: 'mcw-range', weapon: 'MCW', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '30.48m → 36.83m', contextFa: 'near-mid تا ۴۴.۴۵m و میانی تا ۵۳.۳۴m افزایش یافت.' },
+  { id: 'mcw-torso', weapon: 'MCW', game: 'mw3', patch: 'S5', metricFa: 'ضریب تنه پایین', value: '1x → 1.1x', contextFa: 'هدف رسمی: هم‌TTK کردن تنه پایین با تنه بالا و بازو.' },
+  { id: 'soa-range', weapon: 'SOA Subverter', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '20.57m → 25.4m', contextFa: '+۲۳٪ — آن را به گزینه بلندبرد بعد از STG44 تبدیل کرد.' },
+  { id: 'basb-leg', weapon: 'BAS-B', game: 'mw3', patch: 'S5R', metricFa: 'ضریب پا و کفش', value: '1x → 1.1x', contextFa: 'تیر زیر کمر هم‌آسیب تنه شد.' },
+  { id: 'basb-range', weapon: 'BAS-B', game: 'mw3', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '35.56m → 40.64m', contextFa: '' },
+  { id: 'mtz762-range', weapon: 'MTZ-762', game: 'mw3', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '29.2m → 33m', contextFa: '+۱۳٪.' },
+  { id: 'eradicator-min', weapon: 'TAQ Eradicator', game: 'mw3', patch: 'S5', metricFa: 'حداقل آسیب', value: '24 → 28', contextFa: 'همراه با برد حداکثر ۳۳.۰۲ → ۳۹.۳۷m.' },
+  { id: 'holger26-torso', weapon: 'Holger 26', game: 'mw3', patch: 'S5', metricFa: 'ضریب تنه پایین', value: '1.1x → 1x', contextFa: 'نرَفِ آگاهانه: برای TTK هدف باید دقیق‌تر شلیک کنی.' },
+  { id: 'holger556-range', weapon: 'Holger 556', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '36.83m → 41.91m', contextFa: '' },
+  { id: 'sva-range', weapon: 'SVA 545', game: 'mw3', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '31.75m → 36.83m', contextFa: '' },
+  { id: 'fr556-range', weapon: 'FR 5.56', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '38.1m → 43.18m', contextFa: 'بازو و دست هم 1x → 1.1x شد.' },
+  { id: 'dg56-torso', weapon: 'DG-56', game: 'mw3', patch: 'S5R', metricFa: 'ضریب تنه پایین', value: '1x → 1.1x', contextFa: '' },
+  { id: 'rival9-range', weapon: 'Rival-9', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '12.7m → 15.24m', contextFa: '' },
+  { id: 'striker-range', weapon: 'Striker', game: 'warzone', patch: 'S5R', metricFa: 'برد آسیب حداکثر', value: '12.7m → 14.48m', contextFa: 'near-mid هم 24.13m → 26.67m.' },
+  { id: 'fjx-mw3-range', weapon: 'FJX Horus', game: 'mw3', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '10.16m → 8.63m', contextFa: 'near-mid 20.32 → 17.27m و میانی 30.48 → 25.91m.' },
+  { id: 'fjx-wz-range', weapon: 'FJX Horus', game: 'warzone', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '13.7m → 11.4m', contextFa: '−۱۷٪؛ sprint-to-fire 93ms → 110ms.' },
+  { id: 'mtzint-range', weapon: 'MTZ Interceptor', game: 'warzone', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '30.5m → 22.9m', contextFa: '−۲۵٪ و ضرایب تنه/بازو/دست 1x → 0.9x.' },
+  { id: 'reclaimer-rpm', weapon: 'Reclaimer 18', game: 'warzone', patch: 'S5', metricFa: 'نرخ آتش نیم‌اَتوماتیک', value: '182rpm → 200rpm', contextFa: 'در عوض پراکندگی هیپ‌فایر ۱۲٪ زیاد شد.' },
+  { id: 'reclaimer-pump', weapon: 'Reclaimer 18', game: 'warzone', patch: 'S5', metricFa: 'حداکثر آسیب هیپ‌فایر (پمپ)', value: '80 → 220', contextFa: '+۱۷۵٪ و برد آن 2m → 3m — یک‌شات شد.' },
+  { id: 'cor45-rpm', weapon: 'COR-45', game: 'both', patch: 'S5', metricFa: 'نرخ آتش', value: '375rpm → 240rpm', contextFa: '−۳۶٪؛ تریگر v6 به 264rpm و v21 به 272rpm رسید.' },
+  { id: 'wsp9-leg', weapon: 'WSP-9', game: 'mw3', patch: 'S5', metricFa: 'ضریب پاها', value: '1x → 0.9x', contextFa: '' },
+  { id: 'amr9-range', weapon: 'AMR9', game: 'mw3', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '12.7m → 15.24m', contextFa: 'near-mid هم 17.78m → 21.59m.' },
+  { id: 'superi-speed', weapon: 'Superi 46', game: 'both', patch: 'S5', metricFa: 'سرعت حرکت', value: '5m/s → 4.9m/s', contextFa: 'چمباتمه 2 → 1.9، ساسو 5.9 → 5.8، ADS 3.6 → 3.4m/s.' },
+  { id: 'xrk-stalker', weapon: 'XRK Stalker', game: 'warzone', patch: 'S5', metricFa: 'ضریب پا', value: '1x → 1.1x', contextFa: 'داخل برد حداکثر، یک‌شات در هر نقطه بدن.' },
+  { id: 'carrack-range', weapon: 'Carrack .300', game: 'warzone', patch: 'S5', metricFa: 'برد near-mid', value: '30.7m → 66m', contextFa: '+۱۱۵٪ و برد میانی حذف شد.' },
+  { id: 'tyr-range', weapon: 'TYR', game: 'warzone', patch: 'S5', metricFa: 'برد آسیب حداکثر', value: '5.6m → 8.9m', contextFa: '+۱۴٪؛ near-mid هم 11.4m → 15.2m.' },
+  { id: 'sledge', weapon: 'Sledgehammer (Melee)', game: 'both', patch: 'S5', metricFa: 'سرعت حمل', value: '−22%', contextFa: 'در وارزون برد حداکثر 5.3m → 3.2m شد.' },
+]
+
+export const PATCH_LABEL: Record<PatchTag, string> = {
+  S5: 'سیزن ۵ · 24 ژوئیه 2024',
+  S5R: 'سیزن ۵ ریلُود · 21 اوت 2024',
 }

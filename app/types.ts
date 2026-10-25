@@ -26,33 +26,33 @@ export interface Objective {
   weaponClass?: string
 }
 
-export interface ShopItem {
+export type StoreKind = 'bundle' | 'battle_pass' | 'blackcell' | 'vault'
+
+export interface StoreItem {
   id: string
   name: string
   nameFa: string
-  category: string
-  categoryFa: string
-  price: number
-  originalPrice?: number
-  rarity: Rarity
-  game: GameMode
-  isFeatured: boolean
-  isNew: boolean
-  discount?: number
-  colorScheme: [string, string]
-  icon: string
-  includes?: string[]
+  kind: StoreKind
+  themeFa: string
+  price?: number
+  priceNote?: string
+  releasedOn?: string
+  includes: string[]
+  blackCellNote?: string
+  note?: string
 }
 
-export interface ShopResponse {
-  featured: ShopItem[]
-  daily: ShopItem[]
-  lastUpdated: string
-  nextReset: string
-}
-
-export type WeaponClass = 'assault_rifle' | 'smg' | 'lmg' | 'sniper' | 'marksman' | 'shotgun' | 'handgun'
+export type WeaponClass =
+  | 'assault_rifle'
+  | 'battle_rifle'
+  | 'smg'
+  | 'lmg'
+  | 'sniper'
+  | 'marksman'
+  | 'shotgun'
+  | 'handgun'
 export type MetaTier = 'S' | 'A' | 'B' | 'C' | 'D'
+export type PatchTag = 'S5' | 'S5R'
 
 export interface MetaWeapon {
   id: string
@@ -61,13 +61,22 @@ export interface MetaWeapon {
   classFa: string
   tier: MetaTier
   game: GameMode
+  addedIn: string
+  // Editorial 1–10 aggregate, not an in-game stat — see scoresNoteFa
   damage: number
   range: number
   fireRate: number
   mobility: number
   control: number
+  scoresNoteFa: string
   bestFor: string
+  prosFa: string[]
+  consFa: string[]
+  // Verbatim adjustments from the official Season 5 / Season 5 Reloaded notes
+  changesFa: { patch: PatchTag; detail: string }[]
   topAttachments: string[]
+  loadoutSource?: string
+  verifiedBy: string
   trending: 'up' | 'down' | 'stable'
 }
 
@@ -97,16 +106,26 @@ export interface PatchNote {
   version: string
   titleFa: string
   summary: string
+  source?: string
   changes: { category: string; categoryFa: string; items: string[] }[]
 }
 
-export interface BattlePassItem {
-  tier: number
-  free: boolean
-  rewardFa: string
-  type: 'operator_skin' | 'blueprint' | 'xp_token' | 'cod_points' | 'emblem' | 'calling_card' | 'charm' | 'sticker' | 'vehicle' | 'camo'
-  icon: string
-  rarity?: Rarity
+export interface BattlePassReward {
+  name: string
+  nameFa: string
+  kind: 'operator_skin' | 'blueprint' | 'weapon' | 'finishing_move' | 'cod_points' | 'boost' | 'other'
+  blackCell?: string
+  detailFa?: string
+}
+
+export interface BattlePassSector {
+  id: string
+  sector: number | 'instant' | 'blackcell' | 'completion'
+  label: string
+  labelFa: string
+  operator?: BattlePassReward
+  rewards: BattlePassReward[]
+  noteFa?: string
 }
 
 export interface MapInfo {
@@ -114,13 +133,15 @@ export interface MapInfo {
   name: string
   nameFa: string
   game: 'warzone' | 'mw3'
-  type: 'battle_royale' | 'multiplayer' | 'dmz'
+  type: 'battle_royale' | 'resurgence' | 'multiplayer'
   typeFa: string
   size: 'کوچک' | 'متوسط' | 'بزرگ' | 'عظیم'
   description: string
   tips: string[]
-  icon: string
-  gradient: string
+  code: string
+  accent: string
+  addedIn: string
+  provenance: 'official' | 'archive'
 }
 
 export interface CamoWeapon {

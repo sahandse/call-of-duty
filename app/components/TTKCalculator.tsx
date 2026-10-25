@@ -1,161 +1,285 @@
 'use client'
-import { useState, useMemo } from 'react'
-import { ttkWeapons, HP_PRESETS, calcSTK, calcTTK } from '../data/ttkData'
+import { useMemo, useState } from 'react'
+import { HP_PRESETS, OfficialStat, calcSTK, calcTTK, officialStats } from '../data/ttkData'
+import { GameMode, PatchTag } from '../types'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
-const CLASS_FA: Record<string, string> = {
-  assault_rifle: 'رایفل اسالت', battle_rifle: 'رایفل نبرد', smg: 'زیرماشین‌تفنگ',
-  sniper: 'تک‌تیرانداز', marksman: 'تفنگ نشانه‌گیر', shotgun: 'شاتگان',
-  lmg: 'مسلسل سبک', handgun: 'تپانچه',
-}
+const GAME_TABS: { id: GameMode | 'all'; label: string }[] = [
+  { id: 'all', label: 'همه' },
+  { id: 'warzone', label: 'وارزون' },
+  { id: 'mw3', label: 'MW3' },
+  { id: 'both' as GameMode, label: 'هر دو' },
+]
 
-function ttkColor(ms: number) {
-  if (ms === 0) return 'text-cod-gold'
-  if (ms < 250) return 'text-green-400'
-  if (ms < 500) return 'text-yellow-400'
-  return 'text-red-400'
-}
+const PATCH_TABS: (PatchTag | 'all')[] = ['all', 'S5', 'S5R']
 
-function TtkBar({ ms, max }: { ms: number; max: number }) {
-  const pct = ms === 0 ? 2 : Math.min((ms / max) * 100, 100)
-  const color = ms === 0 ? 'bg-cod-gold' : ms < 250 ? 'bg-green-500' : ms < 500 ? 'bg-yellow-500' : 'bg-red-500'
+function NumberField({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  suffix,
+}: {
+  label: string
+  value: number
+  onChange: (v: number) => void
+  min: number
+  max: number
+  step?: number
+  suffix?: string
+}) {
   return (
-    <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-      <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
-    </div>
+    <label className="block">
+      <div className="flex items-baseline justify-between mb-1">
+        <span className="hud-tag">{label}</span>
+        <span className="hud-num text-sm text-white">
+          {value}
+          {suffix && <span className="text-gray-500 text-[10px]"> {suffix}</span>}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="w-full accent-cod-gold"
+        aria-label={label}
+      />
+    </label>
   )
 }
 
 export default function TTKCalculator() {
-  const [hpIndex, setHpIndex] = useState(0)
-  const [classFilter, setClassFilter] = useState('all')
-  const [hitZone, setHitZone] = useState<'body' | 'head' | 'limb'>('body')
-  const [sortBy, setSortBy] = useState<'ttk' | 'stk' | 'name'>('ttk')
+  const [hp, setHp] = useState(150)
+  const [damage, setDamage] = useState(32)
+  const [rpm, setRpm] = useState(700)
+  const [zone, setZone] = useState<'body' | 'head' | 'limb'>('body')
+  const [headMult, setHeadMult] = useState(1.5)
+  const [limbMult, setLimbMult] = useState(0.9)
+  const [gameTab, setGameTab] = useState<GameMode | 'all'>('all')
+  const [patchTab, setPatchTab] = useState<PatchTag | 'all'>('all')
+  const [query, setQuery] = useState('')
 
-  const hp = HP_PRESETS[hpIndex].value
+  const mult = zone === 'head' ? headMult : zone === 'limb' ? limbMult : 1
+  const effective = Math.round(damage * mult)
+  const stk = calcSTK(hp, effective)
+  const ttk = calcTTK(hp, effective, rpm)
 
-  const classes = Array.from(new Set(ttkWeapons.map(w => w.class)))
+  const rows = useMemo(
+    () =>
+      officialStats.filter(s => {
+        if (gameTab !== 'all' && s.game !== gameTab) return false
+        if (patchTab !== 'all' && s.patch !== patchTab) return false
+        if (query && !`${s.weapon} ${s.metricFa} ${s.value} ${s.contextFa}`.includes(query)) return false
+        return true
+      }),
+    [gameTab, patchTab, query]
+  )
 
-  const rows = useMemo(() => {
-    return ttkWeapons
-      .filter(w => classFilter === 'all' || w.class === classFilter)
-      .map(w => {
-        const dmg = hitZone === 'head'
-          ? Math.round(w.bodyDamage * w.headMultiplier)
-          : hitZone === 'limb'
-          ? Math.round(w.bodyDamage * w.limbMultiplier)
-          : w.bodyDamage
-        const stk = calcSTK(hp, dmg)
-        const ttk = calcTTK(hp, dmg, w.rpm)
-        return { ...w, dmg, stk, ttk }
-      })
-      .sort((a, b) =>
-        sortBy === 'ttk' ? a.ttk - b.ttk :
-        sortBy === 'stk' ? a.stk - b.stk :
-        a.name.localeCompare(b.name)
-      )
-  }, [hp, classFilter, hitZone, sortBy])
-
-  const maxTTK = Math.max(...rows.map(r => r.ttk))
+  function chip(active: boolean) {
+    return `px-3 py-1.5 text-[11px] tracking-wider uppercase border transition-colors ${
+      active
+        ? 'bg-cod-gold text-black border-cod-gold'
+        : 'bg-cod-card text-gray-400 border-cod-border hover:text-white hover:border-cod-gold/40'
+    }`
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg">⏱️ محاسبه‌گر TTK</h2>
-        <p className="text-gray-500 text-xs mt-1">Time-to-Kill — مقایسه سرعت کشتن سلاح‌ها بر اساس HP هدف</p>
+    <div className="space-y-5">
+      <SectionHeader
+        tab="ttk"
+        title="محاسبه‌گر زمان کشیدن"
+        note="یک ابزار «چه شود اگر» — خودت آسیب و نرخ آتش را بده تا TTK را ببینی. اعداد پایین‌تر، تنها اعدادِ رسمیِ منتشرشده‌اند."
+        stats={[
+          { label: 'STK', value: stk },
+          { label: 'TTK', value: `${ttk}ms` },
+        ]}
+      />
+
+      <SourceNote kind="warning" source="یادداشت‌های رسمی سیزن ۵ و سیزن ۵ ریلُود">
+        Activision هیچ‌وقت جدول کامل آسیب و Rate of Fire سلاح‌های MW3 را منتشر نکرد. به همین‌خاطر این ماشین‌حساب
+        پیش‌فرضِ «سلاح آماده» ندارد: آسیب و rpm را خودت وارد می‌کنی — معمولاً از همان اعدادِ جدول
+        پایین این صفحه.
+      </SourceNote>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-4">
+        <div className="hud-frame bg-cod-card p-4 space-y-4">
+          <p className="hud-eyebrow">ورودی</p>
+
+          <div className="flex flex-wrap gap-2">
+            {HP_PRESETS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setHp(p.value)}
+                className={`px-2.5 py-1 text-[11px] border transition-colors ${
+                  hp === p.value
+                    ? 'bg-cod-gold text-black border-cod-gold'
+                    : 'bg-cod-card2 text-gray-400 border-cod-border hover:text-white'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <NumberField label="جان + زره (HP)" value={hp} onChange={setHp} min={1} max={300} />
+          <NumberField label="آسیب هر تیر به تنه" value={damage} onChange={setDamage} min={1} max={120} />
+          <NumberField label="نرخ آتش" value={rpm} onChange={setRpm} min={30} max={1200} step={10} suffix="rpm" />
+
+          <div className="flex flex-wrap gap-2">
+            {([
+              { id: 'body', label: 'تنه' },
+              { id: 'head', label: 'سر' },
+              { id: 'limb', label: 'دست و پا' },
+            ] as const).map(z => (
+              <button key={z.id} className={chip(zone === z.id)} onClick={() => setZone(z.id)}>
+                {z.label}
+              </button>
+            ))}
+          </div>
+
+          {zone !== 'body' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {zone === 'head' && (
+                <NumberField
+                  label="ضریب هدشات"
+                  value={Math.round(headMult * 100) / 100}
+                  onChange={setHeadMult}
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  suffix="x"
+                />
+              )}
+              {zone === 'limb' && (
+                <NumberField
+                  label="ضریب دست و پا"
+                  value={Math.round(limbMult * 100) / 100}
+                  onChange={setLimbMult}
+                  min={0.5}
+                  max={1.5}
+                  step={0.05}
+                  suffix="x"
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="hud-frame bg-cod-panel p-5">
+            <p className="hud-eyebrow mb-3">خروجی</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="border border-cod-border bg-cod-card p-3">
+                <p className="hud-num text-3xl font-black text-cod-gold">{stk}</p>
+                <p className="hud-tag mt-1">شات لازم</p>
+              </div>
+              <div className="border border-cod-border bg-cod-card p-3">
+                <p className="hud-num text-3xl font-black text-white">{ttk}</p>
+                <p className="hud-tag mt-1">میلی‌ثانیه</p>
+              </div>
+              <div className="border border-cod-border bg-cod-card p-3">
+                <p className="hud-num text-3xl font-black text-cod-sand">{effective}</p>
+                <p className="hud-tag mt-1">آسیب مؤثر</p>
+              </div>
+            </div>
+            <div className="mt-4 h-2 bg-cod-card2 border border-cod-border">
+              <div
+                className="h-full bg-cod-gold transition-all"
+                style={{ width: `${Math.min(100, (ttk / 1500) * 100)}%` }}
+              />
+            </div>
+            <p className="text-gray-500 text-[11px] mt-2">
+              نوار = TTK نسبت به سقف ۱۵۰۰ms. هرچه کوتاه‌تر، سلاح در این فاصله کشنده‌تر.
+            </p>
+          </div>
+
+          <div className="hud-frame bg-cod-card p-4">
+            <p className="hud-eyebrow mb-2">فرمول</p>
+            <div className="space-y-1.5 text-xs text-gray-400 font-mono" dir="ltr">
+              <p>effective = damage × {mult.toFixed(2)} = {effective}</p>
+              <p>shots = ceil(HP / effective) = {stk}</p>
+              <p>interval = 60000 / rpm = {rpm > 0 ? Math.round(60000 / rpm) : 0} ms</p>
+              <p className="text-cod-gold">TTK = (shots − 1) × interval = {ttk} ms</p>
+            </div>
+            <p className="text-gray-600 text-[11px] mt-2 leading-relaxed">
+              شات آخر فاصله‌ی بین دو شات را مصرف نمی‌کند؛ به همین‌خاطر «شات منهای یک» حساب می‌شود. این مدل
+              ساده‌سازیِ عمدی است: زمان ADS، sprint-to-fire و افت آسیب با فاصله را حساب نمی‌کند.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-wrap gap-3">
-        {/* HP preset */}
-        <div className="flex gap-1 bg-cod-card border border-cod-border rounded-lg p-1">
-          {HP_PRESETS.map((p, i) => (
-            <button key={i} onClick={() => setHpIndex(i)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${hpIndex === i ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-              {p.value} HP
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <p className="hud-eyebrow">اعداد رسمی منتشرشده · {officialStats.length} مورد</p>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="جستجوی سلاح…"
+            className="bg-cod-card border border-cod-border px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cod-gold/60 w-40"
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {GAME_TABS.map(g => (
+            <button key={g.id} className={chip(gameTab === g.id)} onClick={() => setGameTab(g.id)}>
+              {g.label}
+            </button>
+          ))}
+          <span className="w-px h-5 bg-cod-border hidden sm:block self-center" />
+          {PATCH_TABS.map(p => (
+            <button key={p} className={chip(patchTab === p)} onClick={() => setPatchTab(p)}>
+              {p === 'all' ? 'همه پچ‌ها' : p}
             </button>
           ))}
         </div>
 
-        {/* Hit zone */}
-        <div className="flex gap-1 bg-cod-card border border-cod-border rounded-lg p-1">
-          {([['body','بدن'],['head','سر'],['limb','اندام']] as const).map(([z, l]) => (
-            <button key={z} onClick={() => setHitZone(z)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${hitZone === z ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-              {l}
-            </button>
-          ))}
-        </div>
-
-        {/* Class filter */}
-        <select value={classFilter} onChange={e => setClassFilter(e.target.value)}
-          className="bg-cod-card border border-cod-border rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-cod-gold/60">
-          <option value="all">همه کلاس‌ها</option>
-          {classes.map(c => <option key={c} value={c}>{CLASS_FA[c] ?? c}</option>)}
-        </select>
-
-        {/* Sort */}
-        <div className="flex gap-1 bg-cod-card border border-cod-border rounded-lg p-1">
-          {([['ttk','TTK'],['stk','STK'],['name','نام']] as const).map(([s, l]) => (
-            <button key={s} onClick={() => setSortBy(s)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${sortBy === s ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-              {l}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* HP badge */}
-      <div className="bg-cod-gold/5 border border-cod-gold/20 rounded-xl p-3 text-xs text-cod-gold">
-        💡 {HP_PRESETS[hpIndex].label} — TTK سبز (&lt;250ms) = سریع | زرد (250–500ms) = متوسط | قرمز (&gt;500ms) = کند
-      </div>
-
-      {/* Table */}
-      <div className="bg-cod-card border border-cod-border rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-cod-card2 text-gray-500 border-b border-cod-border">
-              <tr>
-                <th className="px-4 py-2.5 text-right">سلاح</th>
-                <th className="px-3 py-2.5 text-center">کلاس</th>
-                <th className="px-3 py-2.5 text-center">آسیب</th>
-                <th className="px-3 py-2.5 text-center">RPM</th>
-                <th className="px-3 py-2.5 text-center">STK</th>
-                <th className="px-3 py-2.5 text-center min-w-[160px]">TTK</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-cod-border">
-              {rows.map((w, i) => (
-                <tr key={w.id} className={`hover:bg-cod-card2 transition-colors ${i === 0 ? 'bg-green-900/10' : ''}`}>
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      {i === 0 && <span className="text-green-400 text-xs">🏆</span>}
-                      <span className="text-white font-medium">{w.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2.5 text-center text-gray-500">{CLASS_FA[w.class] ?? w.class}</td>
-                  <td className="px-3 py-2.5 text-center text-orange-400 font-bold">{w.dmg}</td>
-                  <td className="px-3 py-2.5 text-center text-gray-400">{w.rpm}</td>
-                  <td className="px-3 py-2.5 text-center">
-                    <span className="text-blue-400 font-bold">{w.stk}</span>
-                    <span className="text-gray-600"> تیر</span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <TtkBar ms={w.ttk} max={maxTTK} />
-                      <span className={`font-bold w-16 text-left text-xs ${ttkColor(w.ttk)}`}>
-                        {w.ttk === 0 ? 'یک تیره!' : `${w.ttk}ms`}
-                      </span>
-                    </div>
-                  </td>
+        <div className="hud-frame bg-cod-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-cod-card2 text-gray-500">
+                <tr>
+                  <th className="px-4 py-2 text-right">سلاح</th>
+                  <th className="px-3 py-2">پچ</th>
+                  <th className="px-3 py-2 text-right">متریک</th>
+                  <th className="px-3 py-2 text-right">مقدار</th>
+                  <th className="px-4 py-2 text-right">توضیح</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-cod-border">
+                {rows.map((s: OfficialStat) => (
+                  <tr key={s.id} className="hover:bg-cod-card2 align-top">
+                    <td className="px-4 py-2 text-white whitespace-nowrap">{s.weapon}</td>
+                    <td className="px-3 py-2 text-center">
+                      <span className="hud-num text-[10px] font-black px-1.5 bg-cod-card2 text-cod-sand border border-cod-border">
+                        {s.patch}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-gray-300 whitespace-nowrap">{s.metricFa}</td>
+                    <td className="px-3 py-2 hud-num text-cod-gold whitespace-nowrap" dir="ltr">
+                      {s.value}
+                    </td>
+                    <td className="px-4 py-2 text-gray-500 leading-relaxed">{s.contextFa || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {rows.length === 0 && (
+            <div className="p-8 text-center text-gray-500 text-sm">موردی با این فیلترها پیدا نشد.</div>
+          )}
         </div>
-        <p className="text-gray-600 text-xs p-3 border-t border-cod-border">
-          STK = تعداد تیر برای کشتن | TTK = زمان کشتن از اولین تیر تا آخرین
+        <p className="text-gray-600 text-[11px]">
+          «پچ» یعنی S5 = سیزن ۵ (24 ژوئیه 2024) و S5R = سیزن ۵ ریلُود (21 اوت 2024). ستون «مقدار» عیناً از
+          یادداشت‌های رسمی کپی شده است.
         </p>
-      </div>
+      </section>
     </div>
   )
 }

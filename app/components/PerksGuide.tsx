@@ -1,213 +1,200 @@
 'use client'
-import { useState } from 'react'
-import { perksData, metaLoadouts, PerkInfo } from '../data/perksData'
-
-const TIER_STYLE: Record<string, string> = {
-  S: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  A: 'bg-green-500/20 text-green-300 border-green-500/30',
-  B: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  C: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-}
-
-const GAME_BADGE: Record<string, string> = {
-  warzone: 'bg-orange-500/20 text-orange-300',
-  mw3: 'bg-blue-500/20 text-blue-300',
-  both: 'bg-purple-500/20 text-purple-300',
-}
-const GAME_FA: Record<string, string> = { warzone: 'وارزون', mw3: 'MW3', both: 'هر دو' }
-
-const DIFF_STYLE: Record<string, string> = {
-  'آسان': 'text-green-400', 'متوسط': 'text-yellow-400', 'پیشرفته': 'text-red-400',
-}
+import { useMemo, useState } from 'react'
+import { comboBuilds, loadoutOptions, LoadoutSlotId, SLOT_ORDER } from '../data/perksData'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
 export default function PerksGuide() {
-  const [activeTab, setActiveTab] = useState<'perks' | 'loadouts'>('loadouts')
-  const [slotFilter, setSlotFilter] = useState<number | 'all'>('all')
-  const [gameFilter, setGameFilter] = useState<'all' | 'warzone' | 'mw3'>('all')
+  const [tab, setTab] = useState<'slots' | 'combos'>('combos')
+  const [slot, setSlot] = useState<LoadoutSlotId | 'all'>('all')
+  const [query, setQuery] = useState('')
 
-  const filteredPerks = perksData.filter(p => {
-    if (slotFilter !== 'all' && p.slot !== slotFilter) return false
-    return true
-  })
+  const byId = useMemo(() => new Map(loadoutOptions.map(o => [o.id, o])), [])
 
-  const filteredLoadouts = metaLoadouts.filter(l => {
-    if (gameFilter !== 'all' && l.game !== gameFilter && l.game !== 'both') return false
-    return true
-  })
+  const visible = useMemo(
+    () =>
+      loadoutOptions.filter(o => {
+        if (slot !== 'all' && o.slot !== slot) return false
+        if (query && !`${o.name} ${o.nameFa} ${o.descriptionFa}`.toLowerCase().includes(query.toLowerCase()))
+          return false
+        return true
+      }),
+    [slot, query]
+  )
+
+  const changed = loadoutOptions.filter(o => o.changedInS5)
+
+  function chip(active: boolean) {
+    return `px-3 py-1.5 text-[11px] tracking-wider uppercase border transition-colors ${
+      active
+        ? 'bg-cod-gold text-black border-cod-gold'
+        : 'bg-cod-card text-gray-400 border-cod-border hover:text-white hover:border-cod-gold/40'
+    }`
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg flex items-center gap-2">🎖️ راهنمای Perks و متا لودآوت‌ها</h2>
-        <p className="text-gray-500 text-xs mt-1">بهترین Perk‌ها و لودآوت‌های آماده برای Warzone و Modern Warfare 3</p>
+    <div className="space-y-5">
+      <SectionHeader
+        tab="perks"
+        title="پرک‌ها و لودآوت"
+        note="سیستم MW3 پنج اسلات است: جلیقه، دستکش، چکمه، Gear و ارتقای میدانی. همه‌ی گزینه‌ها اینجا فهرست شده‌اند."
+        stats={[
+          { label: 'گزینه', value: loadoutOptions.length },
+          { label: 'ترکیب آماده', value: comboBuilds.length },
+          { label: 'تغییر سیزن ۵', value: changed.length },
+        ]}
+      />
+
+      <SourceNote kind="verified" source="Uplix / Game8 + یادداشت‌های رسمی سیزن ۵">
+        توضیح اثرها بر اساس فهرست رسمی گزینه‌های لودآوت است. هرجا تغییر سیزن ۵ مستند بوده، همان عدد کنار گزینه
+        آمده؛ بقیه گزینه‌ها در پچ‌های این سیزن دست نخورده‌اند.
+      </SourceNote>
+
+      <div className="flex flex-wrap gap-2">
+        <button className={chip(tab === 'combos')} onClick={() => setTab('combos')}>
+          ترکیب‌های آماده
+        </button>
+        <button className={chip(tab === 'slots')} onClick={() => setTab('slots')}>
+          فهرست گزینه‌ها
+        </button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-cod-card border border-cod-border rounded-xl p-1 w-fit">
-        <button onClick={() => setActiveTab('loadouts')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'loadouts' ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-          🔫 متا لودآوت‌ها
-        </button>
-        <button onClick={() => setActiveTab('perks')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'perks' ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-          🎖️ راهنمای Perks
-        </button>
-      </div>
-
-      {activeTab === 'loadouts' && (
-        <div className="space-y-4">
-          {/* Game filter */}
-          <div className="flex gap-1 bg-cod-card border border-cod-border rounded-lg p-1 w-fit">
-            {(['all', 'warzone', 'mw3'] as const).map(g => (
-              <button key={g} onClick={() => setGameFilter(g)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${gameFilter === g ? 'bg-cod-gold text-black' : 'text-gray-400 hover:text-white'}`}>
-                {g === 'all' ? 'همه' : g === 'warzone' ? 'وارزون' : 'MW3'}
-              </button>
-            ))}
-          </div>
-
-          {filteredLoadouts.map(loadout => (
-            <div key={loadout.id} className="bg-cod-card border border-cod-border rounded-xl overflow-hidden hover:border-cod-gold/20 transition-colors">
-              {/* Loadout header */}
-              <div className="p-4 border-b border-cod-border flex items-start gap-3">
-                <span className="text-3xl">{loadout.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-white font-bold">{loadout.nameFa}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${GAME_BADGE[loadout.game]}`}>{GAME_FA[loadout.game]}</span>
-                    <span className={`text-xs font-medium ${DIFF_STYLE[loadout.difficulty]}`}>{loadout.difficulty}</span>
+      {tab === 'combos' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {comboBuilds.map(build => {
+            const vest = byId.get(build.vest)
+            const gloves = byId.get(build.gloves)
+            const boots = byId.get(build.boots)
+            const gear = build.gear.map(id => byId.get(id)).filter(Boolean)
+            const fu = byId.get(build.fieldUpgrade)
+            return (
+              <article key={build.id} className="hud-frame bg-cod-card p-4 space-y-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="hud-tag">{build.styleFa}</span>
                   </div>
-                  <p className="text-gray-400 text-xs mt-1">{loadout.description}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-cod-border">
-                {/* Primary */}
-                <div className="p-4">
-                  <p className="text-gray-500 text-xs mb-2">🔫 اسلحه اصلی</p>
-                  <p className="text-white font-bold text-sm mb-2">{loadout.primary}</p>
-                  <ul className="space-y-1">
-                    {loadout.primaryAttachments.map((a, i) => (
-                      <li key={i} className="text-xs text-gray-400 flex items-center gap-1.5">
-                        <span className="w-1 h-1 rounded-full bg-cod-gold flex-shrink-0" />
-                        {a}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="text-white font-bold text-lg leading-none">{build.nameFa}</h3>
                 </div>
 
-                {/* Secondary */}
-                <div className="p-4">
-                  <p className="text-gray-500 text-xs mb-2">🔧 اسلحه ثانوی</p>
-                  <p className="text-white font-bold text-sm mb-2">{loadout.secondary}</p>
-                  <ul className="space-y-1">
-                    {loadout.secondaryAttachments.map((a, i) => (
-                      <li key={i} className="text-xs text-gray-400 flex items-center gap-1.5">
-                        <span className="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0" />
-                        {a}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="space-y-1.5">
+                  {[
+                    { label: 'VEST', value: vest },
+                    { label: 'GLOVES', value: gloves },
+                    { label: 'BOOTS', value: boots },
+                    ...gear.map((g, i) => ({ label: i === 0 ? 'GEAR' : 'GEAR +', value: g })),
+                    { label: 'FIELD UP', value: fu },
+                  ].map((row, i) =>
+                    row.value ? (
+                      <div key={i} className="flex items-baseline gap-3 border-b border-cod-border/60 pb-1">
+                        <span className="hud-tag w-16 flex-shrink-0">{row.label}</span>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm leading-tight">{row.value.name}</p>
+                          <p className="text-gray-500 text-[11px]">{row.value.nameFa}</p>
+                        </div>
+                      </div>
+                    ) : null
+                  )}
                 </div>
-              </div>
 
-              {/* Perks & Equipment */}
-              <div className="p-4 border-t border-cod-border bg-cod-card2">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                  <div>
-                    <p className="text-gray-500 mb-1">Perks</p>
-                    <div className="flex flex-col gap-1">
-                      {loadout.perks.map((p, i) => (
-                        <span key={i} className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-center">{p}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 mb-1">💥 تجهیزات مرگبار</p>
-                    <span className="bg-red-900/30 text-red-300 px-2 py-0.5 rounded">{loadout.lethal}</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 mb-1">⚡ تجهیزات تاکتیکی</p>
-                    <span className="bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded">{loadout.tactical}</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 mb-1">🔋 Field Upgrade</p>
-                    <span className="bg-green-900/30 text-green-300 px-2 py-0.5 rounded">{loadout.fieldUpgrade}</span>
-                  </div>
+                <div>
+                  <p className="hud-eyebrow mb-1">چرا کار می‌کند</p>
+                  <p className="text-gray-300 text-xs leading-relaxed">{build.whyFa}</p>
                 </div>
-              </div>
-            </div>
-          ))}
+
+                {build.s5NoteFa && (
+                  <div className="border-r-2 border-cod-gold/60 bg-cod-gold/5 px-3 py-2">
+                    <p className="hud-eyebrow text-cod-gold mb-0.5">تغییر سیزن ۵</p>
+                    <p className="text-gray-400 text-[11px] leading-relaxed">{build.s5NoteFa}</p>
+                  </div>
+                )}
+              </article>
+            )
+          })}
         </div>
       )}
 
-      {activeTab === 'perks' && (
+      {tab === 'slots' && (
         <div className="space-y-4">
-          {/* Slot filter */}
-          <div className="flex gap-2 flex-wrap">
-            <span className="text-gray-500 text-xs self-center">اسلات:</span>
-            {(['all', 1, 2, 3] as const).map(s => (
-              <button key={s} onClick={() => setSlotFilter(s)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                  slotFilter === s
-                    ? 'bg-cod-gold text-black border-cod-gold'
-                    : 'bg-cod-card border-cod-border text-gray-400 hover:border-cod-gold/40 hover:text-white'
-                }`}>
-                {s === 'all' ? 'همه' : `اسلات ${s}`}
+          <div className="hud-frame bg-cod-panel p-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <button className={chip(slot === 'all')} onClick={() => setSlot('all')}>
+                همه
               </button>
-            ))}
-          </div>
-
-          {/* Perks grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPerks.map(perk => (
-              <div key={perk.id} className="bg-cod-card border border-cod-border rounded-xl p-4 hover:border-cod-gold/20 transition-colors">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{perk.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <p className="text-white font-bold text-sm">{perk.nameFa}</p>
-                      <span className="text-gray-500 text-xs">({perk.name})</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded border ${TIER_STYLE[perk.tier]}`}>{perk.tier}</span>
-                      <span className="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded">اسلات {perk.slot}</span>
-                    </div>
-                    <p className="text-gray-400 text-xs mb-2">{perk.description}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {perk.bestFor.map((b, i) => (
-                        <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-cod-gold/10 text-cod-gold border border-cod-gold/20">
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Recommended combos */}
-          <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-            <h3 className="text-white font-bold text-sm mb-3">🔥 بهترین ترکیب‌های Perk</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[
-                { name: 'ست وارزون کلاسیک', perks: ['Infantry Vest', 'Ghost', 'Tempered'], desc: 'بیشترین بازیکنان حرفه‌ای وارزون', color: 'border-orange-500/30' },
-                { name: 'ست تهاجمی', perks: ['Double Time', 'Sleight of Hand', 'Resolute'], desc: 'برای بازی aggressive و rush', color: 'border-red-500/30' },
-                { name: 'ست Ranked', perks: ['Infantry Vest', 'Ghost', 'Combat Scout'], desc: 'اطلاعات بیشتر برای تیم', color: 'border-blue-500/30' },
-                { name: 'ست Heavy Support', perks: ['Gunner Vest', 'Ghost', 'Bird\'s Eye'], desc: 'برای سلاح‌های سنگین و LMG', color: 'border-purple-500/30' },
-              ].map(combo => (
-                <div key={combo.name} className={`bg-cod-card2 border ${combo.color} rounded-xl p-3`}>
-                  <p className="text-white font-medium text-xs mb-1">{combo.name}</p>
-                  <p className="text-gray-500 text-xs mb-2">{combo.desc}</p>
-                  <div className="flex gap-1 flex-wrap">
-                    {combo.perks.map((p, i) => (
-                      <span key={i} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">{p}</span>
-                    ))}
-                  </div>
-                </div>
+              {SLOT_ORDER.map(s => (
+                <button key={s.id} className={chip(slot === s.id)} onClick={() => setSlot(s.id)}>
+                  {s.labelFa}
+                </button>
               ))}
             </div>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="جستجو در گزینه‌ها…"
+              className="w-full bg-cod-card border border-cod-border px-3 py-2 text-xs text-white focus:outline-none focus:border-cod-gold/60"
+            />
+            <p className="text-gray-500 text-xs">{visible.length} گزینه</p>
           </div>
+
+          {SLOT_ORDER.filter(s => slot === 'all' || s.id === slot).map(s => {
+            const rows = visible.filter(o => o.slot === s.id)
+            if (rows.length === 0) return null
+            const changedCount = rows.filter(o => o.changedInS5).length
+            return (
+              <section key={s.id} className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <h3 className="hud-title text-sm">
+                    {s.label} <span className="text-gray-500 text-xs">· {s.labelFa}</span>
+                  </h3>
+                  <div className="flex-1 h-px bg-cod-border" />
+                  <span className="hud-tag">{rows.length} گزینه</span>
+                  {changedCount > 0 && (
+                    <span className="hud-num text-[10px] text-cod-gold border border-cod-gold/30 px-1.5">
+                      {changedCount} تغییر S5
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-500 text-xs">{s.noteFa}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                  {rows.map(o => (
+                    <div
+                      key={o.id}
+                      className={`bg-cod-card border p-3 ${
+                        o.changedInS5 ? 'border-cod-gold/40' : 'border-cod-border'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium leading-tight">{o.name}</p>
+                          <p className="text-gray-500 text-[11px]">{o.nameFa}</p>
+                        </div>
+                        {o.changedInS5 && (
+                          <span className="hud-num text-[9px] text-cod-gold border border-cod-gold/40 px-1 flex-shrink-0">
+                            S5
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-400 text-xs mt-1.5 leading-relaxed">{o.descriptionFa}</p>
+                      <p className="text-gray-600 text-[11px] mt-1">{o.slotsFa}</p>
+                      {o.synergyFa && (
+                        <p className="text-cod-green text-[11px] mt-1.5 leading-relaxed">⌁ {o.synergyFa}</p>
+                      )}
+                      {o.changedInS5 && (
+                        <p className="text-cod-gold text-[11px] mt-1.5 leading-relaxed border-t border-cod-border pt-1.5">
+                          {o.changedInS5}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+
+          {visible.length === 0 && (
+            <div className="hud-frame bg-cod-card p-8 text-center text-gray-500 text-sm">
+              گزینه‌ای با این فیلتر پیدا نشد.
+            </div>
+          )}
         </div>
       )}
     </div>

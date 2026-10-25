@@ -1,108 +1,110 @@
-export type EventType = 'double_xp' | 'double_weapon_xp' | 'ltm' | 'seasonal' | 'community'
-
-export interface EventChallenge {
-  id: string
-  nameFa: string
-  descFa: string
-  rewardFa: string
-  xp: number
-}
+export type EventKind = 'festival' | 'field_rep' | 'conquest' | 'esports'
 
 export interface GameEvent {
   id: string
+  name: string
   nameFa: string
-  type: EventType
-  typeFa: string
-  description: string
+  kind: EventKind
+  kindFa: string
   startDate: string
   endDate: string
-  challenges: EventChallenge[]
-  rewards: string[]
-  icon: string
-  colorClass: string
+  dateNoteFa?: string
+  mechanicFa: string
+  rewardsFa: string[]
+  boostWith?: string
+  modesFa: string[]
+  noteFa?: string
 }
 
-export const currentEvents: GameEvent[] = [
+export const season5Events: GameEvent[] = [
   {
-    id: 'season3-operation',
-    nameFa: 'عملیات سیزن ۳',
-    type: 'seasonal',
-    typeFa: 'رویداد فصلی',
-    description: 'رویداد اصلی سیزن ۳ — ۱۰ چالش ویژه با جوایز انحصاری',
-    startDate: '2026-06-01',
-    endDate: '2026-07-15',
-    challenges: [
-      { id: 's3-1', nameFa: 'کیلر بی‌رحم',   descFa: '۵۰ کیل در Warzone',                  rewardFa: 'کارت تماس انحصاری',    xp: 5000  },
-      { id: 's3-2', nameFa: 'بازمانده',        descFa: '۵ بار در Top 10 وارزون',             rewardFa: 'چارم سلاح',             xp: 7500  },
-      { id: 's3-3', nameFa: 'تیم‌بازی',        descFa: '۲۰ کیل تیمی در مولتی‌پلیر',         rewardFa: 'آرم‌بند اپراتور',       xp: 5000  },
-      { id: 's3-4', nameFa: 'تیرانداز ماهر',   descFa: '۳۰ هدشات در هر مود',                rewardFa: 'اسپری',                 xp: 6000  },
-      { id: 's3-5', nameFa: 'استراتژیست',      descFa: '۱۰ بار از تجهیزات تاکتیکی مؤثر',   rewardFa: 'کارت تماس متحرک',       xp: 8000  },
-      { id: 's3-6', nameFa: 'پیروز میدان',     descFa: '۳ بار برنده مسابقه شوید',           rewardFa: 'پوشش سلاح نادر',        xp: 10000 },
-      { id: 's3-7', nameFa: 'مهارت کامو',      descFa: '۵ چالش کامو را تکمیل کنید',         rewardFa: 'آیکون بازیکن',          xp: 7500  },
-      { id: 's3-8', nameFa: 'خرید شاپ',        descFa: '۳ آیتم از فروشگاه بخرید',           rewardFa: '۱۰۰ CoD Point',         xp: 3000  },
-      { id: 's3-9', nameFa: 'بازیکن پیوسته',   descFa: '۵ روز متوالی وارد بازی شوید',       rewardFa: 'پوست اپراتور جدید',     xp: 15000 },
-      { id: 's3-10',nameFa: 'افسانه',           descFa: 'تمام ۹ چالش بالا را تکمیل کنید',   rewardFa: 'باندل ویژه سیزن ۳',    xp: 20000 },
+    id: 'summerslam',
+    name: 'WWE SummerSlam',
+    nameFa: 'رویداد WWE SummerSlam',
+    kind: 'festival',
+    kindFa: 'فستیوال دو هفته‌ای',
+    startDate: '2024-07-31',
+    endDate: '2024-08-07',
+    mechanicFa:
+      'چالش‌ها در همهٔ مودها پخش می‌شدند و با تکمیل آن‌ها آیتم‌های WWE باز می‌شد. تنها رویدادی که یک حالت اختصاصی (Slam Deathmatch) فقط در بازهٔ خودش فعال داشت.',
+    rewardsFa: [
+      'پاداش Mastery به‌صورت اسکین اپراتور',
+      'آیتم‌های کاسمتیک WWE (استیکر، دکال، کارت ویزیت و Finishing Moveهای کشتی)',
     ],
-    rewards: ['پوست اپراتور انحصاری', 'باندل ویژه سیزن ۳', 'کارت تماس انیمیشن‌دار', 'آرم متالیک'],
-    icon: '🌟',
-    colorClass: 'border-cod-gold/40 bg-cod-gold/5',
+    modesFa: ['Multiplayer', 'Warzone', 'Zombies'],
+    noteFa:
+      'در Slam Deathmatch همهٔ Finishing Moveها به حرکات تصادفی WWE تبدیل می‌شدند؛ حالت فقط از ۳۱ ژوئیه در دسترس بود.',
   },
   {
-    id: 'double-xp-weekend',
-    nameFa: 'آخر هفته XP دوبل',
-    type: 'double_xp',
-    typeFa: 'XP دوبل',
-    description: 'تمام XP بازی و Battle Pass این آخر هفته دو برابر است',
-    startDate: '2026-06-27',
-    endDate: '2026-06-30',
-    challenges: [],
-    rewards: ['XP دوبل برای تمام بازی‌ها', 'XP دوبل برای Battle Pass'],
-    icon: '⚡',
-    colorClass: 'border-yellow-500/40 bg-yellow-500/5',
+    id: 'conquest',
+    name: 'Conquest',
+    nameFa: 'رویداد Conquest',
+    kind: 'conquest',
+    kindFa: 'فستیوال چالشی',
+    startDate: '2024-08-07',
+    endDate: '2024-08-14',
+    mechanicFa:
+      'چالش‌های هدفمند در مودهای مشخص مولتی‌پلیر، روی POIهای معین وارزون و نقاط معین Modern Warfare Zombies — نه یک حالت جدید، بلکه مجموعه‌ای از وظایف مکان‌محور.',
+    rewardsFa: ['پاداش‌های فصلی رویداد (کاسمتیک)'],
+    modesFa: ['Multiplayer', 'Warzone', 'MWZ'],
   },
   {
-    id: 'resurgence-royale',
-    nameFa: 'Resurgence Royale',
-    type: 'ltm',
-    typeFa: 'حالت محدود',
-    description: 'حالت ویژه با Respawn نامحدود — آخرین تیم برنده است',
-    startDate: '2026-06-20',
-    endDate: '2026-07-05',
-    challenges: [
-      { id: 'rr-1', nameFa: 'اولین خون',    descFa: 'اول کیل بگیرید',           rewardFa: 'XP 2500',          xp: 2500  },
-      { id: 'rr-2', nameFa: 'بازگشت قهرمان',descFa: '۳ بار Respawn بگیرید',     rewardFa: 'XP 5000',          xp: 5000  },
-      { id: 'rr-3', nameFa: 'آخرین ایستاده',descFa: 'یک بار در مود برنده شوید', rewardFa: 'کارت تماس محدود',  xp: 10000 },
-    ],
-    rewards: ['کارت تماس Resurgence', 'XP ۱۷۵۰۰'],
-    icon: '🏆',
-    colorClass: 'border-orange-500/40 bg-orange-500/5',
+    id: 'echo-endo',
+    name: 'Echo Endo Live!',
+    nameFa: 'Field Rep: Echo Endo Live!',
+    kind: 'field_rep',
+    kindFa: 'Field Rep (پاداش XP محور)',
+    startDate: '2024-08-14',
+    endDate: '2024-08-21',
+    mechanicFa:
+      'ساختار Field Rep: با بازی کردن XP معمولی جمع می‌شود و پاداش‌ها در مسیر XP باز می‌شوند؛ اگر باندل Echo Endo را تجهیز کنید، بوست XP اضافه می‌گیرید.',
+    rewardsFa: ['پاداش‌های مسیر XP رویداد'],
+    boostWith: 'Tracer Pack: Echo Endo Thunder-Bolt',
+    modesFa: ['Multiplayer', 'Warzone', 'Zombies'],
   },
   {
-    id: 'weapon-xp-week',
-    nameFa: 'هفته XP سلاح',
-    type: 'double_weapon_xp',
-    typeFa: 'XP سلاح دوبل',
-    description: 'تمام XP سلاح دو برابر است — ایده‌آل برای level کردن سلاح‌های جدید',
-    startDate: '2026-06-24',
-    endDate: '2026-07-01',
-    challenges: [],
-    rewards: ['XP سلاح دوبل', 'پیشرفت سریع‌تر اتچمنت‌ها'],
-    icon: '🔫',
-    colorClass: 'border-blue-500/40 bg-blue-500/5',
+    id: 'wildlife-most-wanted',
+    name: 'Wildlife Most Wanted',
+    nameFa: 'Field Rep: Wildlife Most Wanted',
+    kind: 'field_rep',
+    kindFa: 'Field Rep (میانهٔ فصل)',
+    startDate: '2024-09-04',
+    endDate: '2024-09-12',
+    dateNoteFa:
+      'دو تاریخ رسمی برای این رویداد وجود دارد: یادداشت‌های سیزن ۵ ریلُود بازهٔ ۲۱ تا ۲۸ آگوست را نوشته‌اند و مقالهٔ محتوایی سیزن ۵ همان Field Rep را ۴ تا ۱۲ سپتامبر ذکر کرده است.',
+    mechanicFa:
+      'Field Rep با پاداش XP؛ تجهیز هر اسکین از بستهٔ Animal Head بوست XP اضافهٔ رویداد را فعال می‌کرد.',
+    rewardsFa: ['پاداش‌های مسیر XP رویداد'],
+    boostWith: 'بستهٔ Animal Head (مثلاً Wildlife Wanted: CODFish)',
+    modesFa: ['Multiplayer', 'Warzone', 'Zombies'],
   },
   {
-    id: 'community-challenge',
-    nameFa: 'چالش جامعه',
-    type: 'community',
-    typeFa: 'چالش جامعه',
-    description: 'بازیکنان با هم به اهداف مشترک می‌رسند — هر مشارکت اهمیت دارد',
-    startDate: '2026-06-15',
-    endDate: '2026-07-10',
-    challenges: [
-      { id: 'cc-1', nameFa: 'کیل جمعی', descFa: 'با هم ۱۰۰۰۰۰۰۰ کیل بگیرید', rewardFa: 'آیتم شاپ رایگان برای همه', xp: 10000 },
-    ],
-    rewards: ['آیتم انحصاری برای تمام شرکت‌کنندگان', 'XP ۱۰۰۰۰'],
-    icon: '🤝',
-    colorClass: 'border-green-500/40 bg-green-500/5',
+    id: 'emotional-overdrive',
+    name: 'Emotional Overdrive',
+    nameFa: 'Field Rep: Emotional Overdrive',
+    kind: 'field_rep',
+    kindFa: 'Field Rep (آخرین رویداد سیزن)',
+    startDate: '2024-09-12',
+    endDate: '2024-09-18',
+    mechanicFa:
+      'آخرین رویداد سیزن ۵ — مسیر XP با پاداش‌های Emoji و بوست XP در صورت تجهیز باندل Emoji.',
+    rewardsFa: ['پاداش‌های مسیر XP رویداد'],
+    boostWith: 'باندل Emoji',
+    modesFa: ['Multiplayer', 'Warzone', 'Zombies'],
+    noteFa: 'پایان این رویداد (۱۸ سپتامبر ۲۰۲۴) پایان محتوای سیزن ۵ بود؛ بعد از آن سیزن ۶ آغاز شد.',
+  },
+  {
+    id: 'code-bowl',
+    name: 'C.O.D.E. Bowl V presented by USAA',
+    nameFa: 'C.O.D.E. Bowl V — رویداد خیریهٔ esports',
+    kind: 'esports',
+    kindFa: 'پخش زنده / خیریه',
+    startDate: '2024-08-28',
+    endDate: '2024-08-28',
+    mechanicFa:
+      'پنجمین دورهٔ رویداد Call of Duty Endowment با تیم‌های آمریکا، بریتانیا و کانادا؛ پنجرهٔ Watch XP در بازی همراه آن فعال بود.',
+    rewardsFa: ['XP و پاداش‌های تماشای رویداد (Watch Party)'],
+    modesFa: ['Esports Broadcast'],
+    noteFa: 'در این دوره دومین جایزهٔ Monster Energy MVP اهدا شد.',
   },
 ]

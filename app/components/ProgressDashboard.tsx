@@ -1,183 +1,201 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { camoWeapons } from '../data/camoData'
-import { battlePassItems } from '../data/battlePassData'
-import { currentEvents } from '../data/eventsData'
+import { battlePassSectors } from '../data/battlePassData'
+import { season5Events } from '../data/eventsData'
 import { collectionItems } from '../data/collectionData'
+import SectionHeader from './SectionHeader'
+import SourceNote from './SourceNote'
 
 interface Stats {
   camoCompleted: number
   camoTotal: number
-  bpTier: number
+  bpUnlocked: number
+  bpTotal: number
+  bpSectors: number
   loadouts: number
   collectionOwned: number
   collectionTotal: number
-  eventChallenges: number
-  eventTotal: number
+  eventsDone: number
+  eventsTotal: number
 }
 
-function StatCard({ icon, label, value, max, color }: {
-  icon: string; label: string; value: number; max?: number; color: string
+function readArray(key: string): unknown[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || '[]')
+    return Array.isArray(raw) ? raw : []
+  } catch {
+    return []
+  }
+}
+
+function StatCard({
+  label,
+  value,
+  max,
+  bar,
+}: {
+  label: string
+  value: number
+  max: number
+  bar: string
 }) {
-  const pct = max ? Math.round((value / max) * 100) : null
+  const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0
   return (
-    <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">{icon}</span>
-        <span className="text-gray-400 text-xs">{label}</span>
+    <div className="hud-frame bg-cod-card p-4">
+      <p className="hud-eyebrow mb-2">{label}</p>
+      <div className="flex items-end gap-1.5 mb-2">
+        <span className="hud-num text-2xl font-black text-white">{value}</span>
+        <span className="hud-num text-sm text-gray-600 mb-0.5">/ {max}</span>
       </div>
-      <div className="flex items-end gap-2 mb-2">
-        <span className={`text-2xl font-black ${color}`}>{value}</span>
-        {max && <span className="text-gray-500 text-sm mb-0.5">/ {max}</span>}
+      <div className="h-1 bg-cod-card2 border border-cod-border">
+        <div className={`h-full ${bar}`} style={{ width: `${pct}%` }} />
       </div>
-      {pct !== null && (
-        <div>
-          <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all bg-current ${color}`} style={{ width: `${pct}%` }} />
-          </div>
-          <p className="text-gray-600 text-xs mt-1">{pct}% تکمیل شده</p>
-        </div>
-      )}
+      <p className="hud-num text-[10px] text-gray-600 mt-1">{pct}%</p>
     </div>
   )
 }
 
 export default function ProgressDashboard() {
-  const [stats, setStats] = useState<Stats>({
-    camoCompleted: 0, camoTotal: 0,
-    bpTier: 0,
-    loadouts: 0,
-    collectionOwned: 0, collectionTotal: collectionItems.length,
-    eventChallenges: 0, eventTotal: 0,
-  })
+  const [stats, setStats] = useState<Stats | null>(null)
+
+  const totals = useMemo(() => {
+    const camoTotal = camoWeapons.reduce((s, w) => s + w.challenges.length, 0)
+    const bpTotal = battlePassSectors.reduce((s, sec) => s + sec.rewards.length, 0)
+    return {
+      camoTotal,
+      bpTotal,
+      collectionTotal: collectionItems.length,
+      eventsTotal: season5Events.length,
+    }
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const camoCompleted = JSON.parse(localStorage.getItem('cod-camo-completed') || '[]') as string[]
-    const camoTotal = camoWeapons.reduce((s, w) => s + w.challenges.length, 0)
-
-    const bpUnlocked = JSON.parse(localStorage.getItem('cod-battlepass-unlocked') || '[]') as number[]
-    const bpTier = bpUnlocked.length > 0 ? Math.max(...bpUnlocked) : 0
-
-    const loadouts = JSON.parse(localStorage.getItem('cod-loadouts') || '[]')
-
-    const collection = JSON.parse(localStorage.getItem('cod-collection') || '[]') as string[]
-
-    const allEventChallenges = currentEvents.flatMap(e => e.challenges)
-    const eventTotal = allEventChallenges.length
-    let eventChallenges = 0
-    currentEvents.forEach(e => {
-      const done = JSON.parse(localStorage.getItem(`cod-event-${e.id}`) || '[]') as string[]
-      eventChallenges += done.length
-    })
+    const camoCompleted = readArray('cod-camo-completed').length
+    const bpUnlocked = readArray('cod-battlepass-unlocked').length
+    const bpSectors = new Set(
+      readArray('cod-battlepass-unlocked').map(k => String(k).split('#')[0])
+    ).size
+    const loadouts = readArray('cod-loadouts').length
+    const collectionOwned = readArray('cod-collection').length
+    const eventsDone = season5Events.filter(e => localStorage.getItem(`cod-event-${e.id}`) === 'true').length
 
     setStats({
-      camoCompleted: camoCompleted.length,
-      camoTotal,
-      bpTier,
-      loadouts: loadouts.length,
-      collectionOwned: collection.length,
-      collectionTotal: collectionItems.length,
-      eventChallenges,
-      eventTotal,
+      camoCompleted,
+      camoTotal: totals.camoTotal,
+      bpUnlocked,
+      bpTotal: totals.bpTotal,
+      bpSectors,
+      loadouts,
+      collectionOwned,
+      collectionTotal: totals.collectionTotal,
+      eventsDone,
+      eventsTotal: totals.eventsTotal,
     })
-  }, [])
+  }, [totals])
 
-  const overallPct = (() => {
+  const overall = useMemo(() => {
+    if (!stats) return 0
     const parts = [
       stats.camoTotal > 0 ? stats.camoCompleted / stats.camoTotal : 0,
-      stats.bpTier / 100,
-      stats.collectionOwned / stats.collectionTotal,
-      stats.eventTotal > 0 ? stats.eventChallenges / stats.eventTotal : 0,
+      stats.bpTotal > 0 ? stats.bpUnlocked / stats.bpTotal : 0,
+      stats.collectionTotal > 0 ? stats.collectionOwned / stats.collectionTotal : 0,
+      stats.eventsTotal > 0 ? stats.eventsDone / stats.eventsTotal : 0,
     ]
-    return Math.round(parts.reduce((a, b) => a + b, 0) / parts.length * 100)
-  })()
+    return Math.round((parts.reduce((a, b) => a + b, 0) / parts.length) * 100)
+  }, [stats])
 
   const tips = [
-    { text: 'این هفته XP سلاح دوبل است — سلاح‌های جدیدت را level کن', icon: '⚡' },
-    { text: 'چالش‌های روزانه را فراموش نکن — XP رایگان سریع‌ترین روش است', icon: '🎯' },
-    { text: 'Tempered + Ghost + Infantry Vest بهترین ترکیب وارزون است', icon: '🎖️' },
-    { text: 'در وارزون با ۲ آرمور بازی کن — Tempered فقط ۲ تا نیاز دارد', icon: '🛡️' },
-    { text: 'MTZ Interceptor + WSP Swarm ترکیب کلاسیک وارزون است', icon: '🔫' },
+    'این داشبورد فقط چیزی را می‌خواند که خودت در همان مرورگر علامت زده‌ای — هیچ حسابی به بازی متصل نیست.',
+    'سیزن ۵ در ۲۴ ژوئیه ۲۰۲۴ شروع و در ۱۸ سپتامبر ۲۰۲۴ تمام شد؛ همه‌ی بخش‌های «آرشیو» همین بازه را پوشش می‌دهند.',
+    'برای دیدن اعداد رسمی بالانس (آسیب، برد، Rate of Fire) تب «پچ‌نوتس» را باز کن.',
+    'تراکر کامو و پاس نبرد کلید ذخیره‌سازی جدا دارند؛ پاک کردن داده‌های مرورگر همه را صفر می‌کند.',
   ]
 
   return (
-    <div className="space-y-6">
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h2 className="text-white font-bold text-lg">📈 داشبورد پیشرفت</h2>
-        <p className="text-gray-500 text-xs mt-1">خلاصه‌ای از تمام پیشرفت‌هایت در یک نگاه</p>
-      </div>
+    <div className="space-y-5">
+      <SectionHeader
+        tab="dashboard"
+        title="داشبورد پیشرفت"
+        note="خلاصه‌ی تراکرهای محلی تو — کامو، پاس نبرد، کالکشن و رویدادهای ثبت‌شده."
+        stats={[
+          { label: 'کلی', value: `${overall}%` },
+          { label: 'لودآوت', value: stats ? stats.loadouts : 0 },
+        ]}
+      />
 
-      {/* Overall */}
-      <div className="bg-gradient-to-r from-cod-gold/10 to-transparent border border-cod-gold/20 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="hud-frame bg-cod-panel p-5">
+        <div className="flex items-end justify-between mb-3">
           <div>
-            <h3 className="text-white font-bold">پیشرفت کلی</h3>
-            <p className="text-gray-500 text-xs">میانگین تمام بخش‌ها</p>
+            <p className="hud-eyebrow mb-1">پیشرفت کلی</p>
+            <p className="text-gray-500 text-xs">میانگین چهار تراکر</p>
           </div>
-          <span className="text-4xl font-black text-cod-gold">{overallPct}%</span>
+          <span className="hud-num text-4xl font-black text-cod-gold">{overall}%</span>
         </div>
-        <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-cod-gold to-yellow-400 rounded-full transition-all"
-            style={{ width: `${overallPct}%` }} />
+        <div className="h-2 bg-cod-card2 border border-cod-border">
+          <div
+            className="h-full bg-gradient-to-l from-cod-gold to-cod-gold-light transition-all"
+            style={{ width: `${overall}%` }}
+          />
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon="🎨" label="چالش‌های کامو"   value={stats.camoCompleted} max={stats.camoTotal}       color="text-purple-400" />
-        <StatCard icon="🎫" label="تیر Battle Pass"  value={stats.bpTier}        max={100}                   color="text-cod-gold"   />
-        <StatCard icon="🏆" label="کالکشن آیتم‌ها"  value={stats.collectionOwned} max={stats.collectionTotal} color="text-orange-400" />
-        <StatCard icon="🎉" label="چالش رویدادها"   value={stats.eventChallenges} max={stats.eventTotal || 1} color="text-green-400"  />
-      </div>
-
-      {/* Loadouts quick info */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4 flex items-center gap-4">
-        <span className="text-4xl">🔧</span>
-        <div className="flex-1">
-          <p className="text-white font-bold">{stats.loadouts} لودآوت ذخیره شده</p>
-          <p className="text-gray-500 text-xs">لودآوت‌های شخصی‌سازی‌شده در بخش لودآوت‌ساز</p>
+      {stats ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard label="چالش‌های کامو" value={stats.camoCompleted} max={stats.camoTotal} bar="bg-cod-gold" />
+          <StatCard label="جوایز پاس نبرد" value={stats.bpUnlocked} max={stats.bpTotal} bar="bg-cod-green" />
+          <StatCard label="آیتم کالکشن" value={stats.collectionOwned} max={stats.collectionTotal} bar="bg-cod-sand" />
+          <StatCard label="رویدادهای ثبت‌شده" value={stats.eventsDone} max={stats.eventsTotal} bar="bg-cod-steel" />
         </div>
-        {stats.loadouts === 0 && (
-          <span className="text-xs text-cod-gold border border-cod-gold/30 px-2 py-1 rounded-lg">
-            لودآوت بساز!
-          </span>
-        )}
-      </div>
-
-      {/* Daily tips */}
-      <div className="bg-cod-card border border-cod-border rounded-xl p-4">
-        <h3 className="text-white font-bold text-sm mb-3">💡 نکات روزانه</h3>
-        <div className="space-y-2">
-          {tips.map((t, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm">
-              <span className="mt-0.5 flex-shrink-0">{t.icon}</span>
-              <span className="text-gray-300">{t.text}</span>
-            </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="hud-frame bg-cod-card h-28 animate-pulse" />
           ))}
         </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="hud-frame bg-cod-card p-4">
+          <p className="hud-eyebrow mb-2">لودآوت‌ها</p>
+          <p className="hud-num text-2xl font-black text-white">
+            {stats ? stats.loadouts : 0}
+            <span className="text-gray-600 text-sm"> ذخیره‌شده</span>
+          </p>
+          <p className="text-gray-500 text-xs mt-1">
+            لودآوت‌های ساخته‌شده در تب لودآوت‌ساز، فقط روی همین مرورگر نگه داشته می‌شوند.
+          </p>
+        </div>
+        <div className="hud-frame bg-cod-card p-4">
+          <p className="hud-eyebrow mb-2">سکتورهای پاس نبرد</p>
+          <p className="hud-num text-2xl font-black text-white">
+            {stats ? stats.bpSectors : 0}
+            <span className="text-gray-600 text-sm"> / {battlePassSectors.length} سکتور</span>
+          </p>
+          <p className="text-gray-500 text-xs mt-1">
+            دست‌کم یک جایزه از هر سکتور را علامت زده‌ای.
+          </p>
+        </div>
       </div>
 
-      {/* Quick links */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {[
-          { label: 'ادامه کامو', icon: '🎨', tab: 'camo', desc: `${stats.camoTotal - stats.camoCompleted} چالش باقی‌مانده` },
-          { label: 'Battle Pass', icon: '🎫', tab: 'battlepass', desc: `تیر ${stats.bpTier} از ۱۰۰` },
-          { label: 'رویدادها', icon: '🎉', tab: 'events', desc: 'چالش‌های فعال' },
-          { label: 'کالکشن', icon: '🏆', tab: 'collection', desc: `${stats.collectionTotal - stats.collectionOwned} آیتم باقی‌مانده` },
-          { label: 'مقایسه سلاح', icon: '⚖️', tab: 'compare', desc: 'بهترین TTK را پیدا کن' },
-          { label: 'تیم‌ساز', icon: '👥', tab: 'teambuilder', desc: 'ترکیب تیم بساز' },
-        ].map(link => (
-          <div key={link.tab} className="bg-cod-card border border-cod-border rounded-xl p-3 hover:border-cod-gold/30 transition-colors">
-            <div className="flex items-center gap-2 mb-1">
-              <span>{link.icon}</span>
-              <span className="text-white font-medium text-sm">{link.label}</span>
-            </div>
-            <p className="text-gray-500 text-xs">{link.desc}</p>
-          </div>
-        ))}
+      <div className="hud-frame bg-cod-panel p-4">
+        <p className="hud-eyebrow mb-2">نکات</p>
+        <ul className="space-y-1.5">
+          {tips.map((t, i) => (
+            <li key={i} className="text-gray-400 text-xs leading-relaxed flex gap-2">
+              <span className="text-cod-gold">›</span>
+              {t}
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <SourceNote kind="warning">
+        این داشبورد هیچ داده‌ای به بیرون نمی‌فرستد و هیچ عددی را از سرور بازی نمی‌گیرد. آمار واقعی اکانتت را باید
+        در خود بازی یا اپ رسمی Call of Duty ببینی.
+      </SourceNote>
     </div>
   )
 }

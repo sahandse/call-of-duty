@@ -164,7 +164,7 @@ export const TABS: TabDef[] = [
     en: 'PATCHES',
     group: 'records',
     title: 'یادداشت‌های پچ',
-    description: 'مهم‌ترین تغییرات بالانس و محتوای سیزن ۴ و ۵ — خلاصه‌شده برای بازیکن، نه متن کامل پچ.',
+    description: 'تغییرات بالانس و محتوای سیزن ۵ و سیزن ۵ ریلُود — اعداد رسمی آسیب، برد و Rate of Fire از یادداشت‌های منتشرشده.',
   },
   {
     id: 'collection',
